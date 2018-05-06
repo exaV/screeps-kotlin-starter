@@ -1,0 +1,94 @@
+import groovy.json.internal.LazyMap
+import groovyx.net.http.HttpResponseDecorator
+import groovyx.net.http.RESTClient
+
+import static groovyx.net.http.ContentType.JSON
+
+buildscript {
+    ext.kotlin_version = '1.2.41'
+
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org._10ne.gradle:rest-gradle-plugin:0.4.2"
+    }
+}
+
+plugins {
+    id "org.tenne.rest" version "0.4.2"
+}
+
+version '1.0-SNAPSHOT'
+
+apply plugin: 'kotlin2js'
+apply plugin: 'kotlin-dce-js'
+
+runDceKotlinJs.dceOptions.devMode = false
+runDceTestKotlinJs.dceOptions.devMode = true
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {
+        url "https://delconte.bintray.com/screeps-kotlin-types"
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    compile "ch.delconte.screeps-kotlin:screeps-kotlin-types:0.9.0"
+
+    testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+}
+
+compileKotlin2Js {
+    kotlinOptions{
+        outputFile = "${buildDir}/screeps/main.js"
+        moduleKind = "umd"
+        sourceMap = true
+        metaInfo = true
+    }
+
+    runDceKotlinJs.keep "main.loop"
+}
+
+/**
+ * build and deploy to
+ *
+ */
+task("deploy") {
+    group = 'screeps'
+    dependsOn build
+    doLast {
+        String kotlin = new File("$buildDir/kotlin-js-min/main/kotlin.js").getText('UTF-8')
+        String screepsTypes = new File("$buildDir/kotlin-js-min/main/screeps-kotlin-types.js").getText('UTF-8')
+        String screepsCode = new File("$buildDir/kotlin-js-min/main/main.js").getText('UTF-8')
+
+        String branchName = "kotlin-start"
+
+        RESTClient client = new RESTClient()
+        client.uri = "https://screeps.com/api/user/code"
+        client.headers["Authorization"] = 'Basic ' + ("$screepsUser:$screepsPassword".toString().bytes.encodeBase64())
+        client.headers["Content-Type"] = "application/json"
+        client.handler.success = { HttpResponseDecorator response, LazyMap data->
+            //screeps api is a bit weird, we get 200 OK even if branch does not exist
+            if (data.keySet().any { it.contains("error")}) throw new GradleScriptException(data.toString(),null)
+            println data
+        }
+        client.handler.failure = { resp, data ->
+            resp.setData(data)
+            println data
+        }
+        client.post(body: [branch: branchName, modules: [main                  : screepsCode,
+                                                         'screeps-kotlin-types': screepsTypes,
+                                                         kotlin                : kotlin]], requestContentType: JSON)
+
+    }
+
+
+}
