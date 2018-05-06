@@ -35,7 +35,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven {
-        url "https://delconte.bintray.com/screeps-kotlin-types"
+        url "https://dl.bintray.com/exav/screeps-kotlin"
     }
 }
 
