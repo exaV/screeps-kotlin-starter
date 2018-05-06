@@ -18,5 +18,5 @@ Credentials must be provided in a 'gradle.properties' file in the root folder of
     screepsUser=<your-username>
     screepsPassword=<your-password>
 
-###
+### Types
 Standalone types are available here: https://github.com/exaV/screeps-kotlin-types
