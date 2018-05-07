@@ -47,9 +47,7 @@ fun gameLoop() {
             Role.HARVESTER -> Harvester.run(creep)
             Role.BUILDER -> Builder.run(creep)
             Role.UPGRADER -> Upgrader.run(creep)
-            else -> {
-                creep.say("\uD83D\uDEAC")
-            }
+            else -> creep.pause()
 
         }
     }
@@ -75,6 +73,17 @@ private fun spawnCreeps(
             }
 
         }
+    }
+}
+
+fun Creep.pause() {
+    if (memory.pause < 10) {
+        //blink slowly
+        if (memory.pause % 3 != 0) say("\uD83D\uDEAC")
+        memory.pause++
+    } else {
+        memory.pause = 0
+        memory.role = Role.HARVESTER
     }
 }
 

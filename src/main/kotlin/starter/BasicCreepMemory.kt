@@ -16,3 +16,10 @@ var CreepMemory.role: Role
     set(value) {
         this.asDynamic().role = value.name
     }
+
+var CreepMemory.pause: Int
+    get () = this.asDynamic().pause ?: 0
+    set (value) {
+        this.asDynamic().pause = value
+    }
+
