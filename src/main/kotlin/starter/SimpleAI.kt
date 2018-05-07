@@ -1,6 +1,7 @@
 package starter
 
 
+import types.base.delete
 import types.base.get
 import types.base.global.*
 import types.base.iterator
@@ -91,6 +92,3 @@ fun houseKeeping(creeps: Map<String, Creep>) {
         }
     }
 }
-
-external fun delete(p: dynamic): Boolean = definedExternally
-
