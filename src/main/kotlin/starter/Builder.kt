@@ -7,28 +7,31 @@ import types.base.prototypes.findEnergy
 
 object Builder {
     fun run(creep: Creep) {
+        with(creep) {
+            if (memory.building && carry.energy == 0) {
+                memory.building = false;
+                say("🔄 harvest")
+            }
+            if (!memory.building && carry.energy == carryCapacity) {
+                memory.building = true;
+                say("🚧 build");
+            }
 
-        if (creep.memory.building == true && creep.carry.energy == 0) {
-            creep.memory.building = false;
-            creep.say("🔄 harvest")
-        }
-        if (creep.memory.building != true && creep.carry.energy == creep.carryCapacity) {
-            creep.memory.building = true;
-            creep.say("🚧 build");
-        }
-
-        if (creep.memory.building == true) {
-            val targets = creep.room.findConstructionSites()
-            if (targets.isNotEmpty()) {
-                if (creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0].pos);
+            if (memory.building) {
+                val targets = room.findConstructionSites()
+                if (targets.isNotEmpty()) {
+                    if (build(targets[0]) == ERR_NOT_IN_RANGE) {
+                        moveTo(targets[0].pos);
+                    }
+                }
+            } else {
+                val sources = room.findEnergy()
+                if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                    moveTo(sources[0].pos)
                 }
             }
-        } else {
-            val sources = creep.room.findEnergy()
-            if (creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0].pos)
-            }
         }
+
+
     }
 }

@@ -11,12 +11,6 @@ import types.base.prototypes.structures.StructureSpawn
 import types.base.toMap
 
 
-class CreepOptions(role: Role) : SpawnOptions {
-    override val memory = object : CreepMemory {
-        val role: String = role.name
-    }
-}
-
 val minPopulations = arrayOf(Role.HARVESTER to 2, Role.UPGRADER to 1, Role.BUILDER to 2)
 
 fun gameLoop() {
@@ -29,7 +23,8 @@ fun gameLoop() {
     //make sure we have at least some creeps
     spawnCreeps(minPopulations, creeps, mainSpawn)
 
-    for ((roomName, room) in Game.rooms) {
+    //spawn a big creep if we have plenty of energy
+    for ((_, room) in Game.rooms) {
         if (room.energyAvailable > 549) {
             mainSpawn.spawnCreep(
                 arrayOf(
@@ -41,22 +36,21 @@ fun gameLoop() {
                     MOVE,
                     MOVE
                 ),
-                "HarvesterBig",
-                CreepOptions(Role.HARVESTER)
+                "HarvesterBig_${Game.time}",
+                CreepSpawnOptions(Role.HARVESTER)
             )
         }
     }
 
     for ((_, creep) in creeps) {
+        when (creep.memory.role) {
+            Role.HARVESTER -> Harvester.run(creep)
+            Role.BUILDER -> Builder.run(creep)
+            Role.UPGRADER -> Upgrader.run(creep)
+            else -> {
+                creep.say("\uD83D\uDEAC")
+            }
 
-        if (creep.memory.role == Role.HARVESTER) {
-            Harvester.run(creep)
-        }
-        if (creep.memory.role == Role.BUILDER) {
-            Builder.run(creep);
-        }
-        if (creep.memory.role == Role.UPGRADER) {
-            Upgrader.run(creep)
         }
     }
 
@@ -72,7 +66,7 @@ private fun spawnCreeps(
         if (current.size < min) {
             val newName = "${role.name}_${Game.time}"
             val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
-            val code = spawn.spawnCreep(body, newName, CreepOptions(role))
+            val code = spawn.spawnCreep(body, newName, CreepSpawnOptions(role))
 
             when (code) {
                 OK -> console.log("spawning $newName with body $body")
@@ -81,6 +75,12 @@ private fun spawnCreeps(
             }
 
         }
+    }
+}
+
+class CreepSpawnOptions(role: Role) : SpawnOptions {
+    override val memory = object : CreepMemory {
+        val role: String = role.name
     }
 }
 
