@@ -9,9 +9,9 @@ Feel free to copy/fork this repository to bootstrap your own AI.
 ### Code upload
 
 Deployment is automated with gradle. 
-The branch 'kotlin-start' is used by default, [make sure it exists](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches).
+The branch `kotlin-start` is used by default, [make sure it exists](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches).
 
-Credentials must be provided in a `gradle.properties file in the root folder of the project.
+Credentials must be provided in a `gradle.properties` file in the root folder of the project.
     
     screepsUser=<your-username>
     screepsPassword=<your-password>
