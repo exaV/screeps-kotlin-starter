@@ -44,9 +44,9 @@ fun gameLoop() {
 
     for ((_, creep) in creeps) {
         when (creep.memory.role) {
-            Role.HARVESTER -> Harvester.run(creep)
-            Role.BUILDER -> Builder.run(creep)
-            Role.UPGRADER -> Upgrader.run(creep)
+            Role.HARVESTER -> harvester(creep)
+            Role.BUILDER -> builder(creep)
+            Role.UPGRADER -> upgrader(creep, mainSpawn.room.controller!!)
             else -> creep.pause()
 
         }
