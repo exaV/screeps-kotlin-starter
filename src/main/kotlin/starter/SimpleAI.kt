@@ -27,17 +27,17 @@ fun gameLoop() {
     for ((_, room) in Game.rooms) {
         if (room.energyAvailable > 549) {
             mainSpawn.spawnCreep(
-                arrayOf(
-                    WORK,
-                    WORK,
-                    WORK,
-                    WORK,
-                    CARRY,
-                    MOVE,
-                    MOVE
-                ),
-                "HarvesterBig_${Game.time}",
-                CreepSpawnOptions(Role.HARVESTER)
+                    arrayOf(
+                            WORK,
+                            WORK,
+                            WORK,
+                            WORK,
+                            CARRY,
+                            MOVE,
+                            MOVE
+                    ),
+                    "HarvesterBig_${Game.time}",
+                    CreepSpawnOptions(Role.HARVESTER)
             )
         }
     }
@@ -55,9 +55,9 @@ fun gameLoop() {
 }
 
 private fun spawnCreeps(
-    minPopulations: Array<Pair<Role, Int>>,
-    creeps: Map<String, Creep>,
-    spawn: StructureSpawn
+        minPopulations: Array<Pair<Role, Int>>,
+        creeps: Map<String, Creep>,
+        spawn: StructureSpawn
 ) {
     for ((role, min) in minPopulations) {
         val current = creeps.filter { (_, creep) -> creep.memory.role == role }

@@ -19,9 +19,9 @@ fun harvester(creep: Creep, fromRoom: Room = creep.room, toRoom: Room = creep.ro
         }
     } else {
         val targets = toRoom.findStructures()
-            .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
-            .map { (it as StructureSpawn) }
-            .filter { it.energy < it.energyCapacity }
+                .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
+                .map { (it as StructureSpawn) }
+                .filter { it.energy < it.energyCapacity }
 
         if (targets.isNotEmpty()) {
             if (creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
