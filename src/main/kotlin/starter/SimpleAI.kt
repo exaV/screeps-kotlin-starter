@@ -11,7 +11,7 @@ import types.base.prototypes.structures.StructureSpawn
 import types.base.toMap
 
 
-val minPopulations = arrayOf(Role.HARVESTER to 2, Role.UPGRADER to 1, Role.BUILDER to 2)
+private val minPopulations = arrayOf(Role.HARVESTER to 2, Role.UPGRADER to 1, Role.BUILDER to 2)
 
 fun gameLoop() {
     val mainSpawn: StructureSpawn = Game.spawns["Spawn1"]!!
@@ -44,11 +44,10 @@ fun gameLoop() {
 
     for ((_, creep) in creeps) {
         when (creep.memory.role) {
-            Role.HARVESTER -> harvester(creep)
-            Role.BUILDER -> builder(creep)
-            Role.UPGRADER -> upgrader(creep, mainSpawn.room.controller!!)
+            Role.HARVESTER -> creep.harvest()
+            Role.BUILDER -> creep.build()
+            Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
             else -> creep.pause()
-
         }
     }
 
@@ -76,24 +75,13 @@ private fun spawnCreeps(
     }
 }
 
-fun Creep.pause() {
-    if (memory.pause < 10) {
-        //blink slowly
-        if (memory.pause % 3 != 0) say("\uD83D\uDEAC")
-        memory.pause++
-    } else {
-        memory.pause = 0
-        memory.role = Role.HARVESTER
-    }
-}
-
-class CreepSpawnOptions(role: Role) : SpawnOptions {
+private class CreepSpawnOptions(role: Role) : SpawnOptions {
     override val memory = object : CreepMemory {
         val role: String = role.name
     }
 }
 
-fun houseKeeping(creeps: Map<String, Creep>) {
+private fun houseKeeping(creeps: Map<String, Creep>) {
     for ((creepName, _) in Memory.creeps) {
         if (creeps[creepName] == null) {
             console.log("deleting obselete memory entry for creep $creepName")
