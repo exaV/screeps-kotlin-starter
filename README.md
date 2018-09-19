@@ -15,6 +15,8 @@ Credentials must be provided in a `gradle.properties` file in the root folder of
     
     screepsUser=<your-username>
     screepsPassword=<your-password>
+    host=https://screeps.com (optional)
+    branch==kotlin-start (optional)
     
 Usage:
 
