@@ -1,25 +1,9 @@
 package starter
 
+import starter.memoryOrDefault
 import types.base.global.CreepMemory
+import types.extensions.memory.memoryOrDefault
 
-var CreepMemory.building: Boolean
-    get() = this.asDynamic().building ?: false
-    set(value) {
-        this.asDynamic().building = value
-    }
-
-var CreepMemory.role: Role
-    get() {
-        val roleString: String? = this.asDynamic().role
-        return if (roleString != null) Role.valueOf(roleString) else Role.UNASSIGNED
-    }
-    set(value) {
-        this.asDynamic().role = value.name
-    }
-
-var CreepMemory.pause: Int
-    get () = this.asDynamic().pause ?: 0
-    set (value) {
-        this.asDynamic().pause = value
-    }
-
+var CreepMemory.building: Boolean by memoryOrDefault(false)
+var CreepMemory.pause: Int by memoryOrDefault(0)
+var CreepMemory.role: Role by memoryOrDefault(Role.UNASSIGNED)
