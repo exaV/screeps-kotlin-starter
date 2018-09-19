@@ -45,17 +45,20 @@ tasks {
     register("deploy", RestTask::class) {
         group = "screeps"
         dependsOn("build")
-
-        val modules = File("$buildDir/kotlin-js-min/main")
-            .listFiles { _, name -> name.endsWith(".js") }
-            .associate { it.nameWithoutExtension to it.readText() }
-            .toMap()
+        val modules = mutableMapOf<String, String>()
 
         httpMethod = "post"
         uri = "${host ?: defaultHost}/api/user/code"
         requestHeaders = mapOf("Authorization" to "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
         contentType = groovyx.net.http.ContentType.JSON
         requestBody = mapOf("branch" to branch, "modules" to modules)
+
+        doFirst {
+            modules.putAll(File("$buildDir/kotlin-js-min/main")
+                .listFiles { _, name -> name.endsWith(".js") }
+                .associate { it.nameWithoutExtension to it.readText() })
+
+        }
     }
 }
 
