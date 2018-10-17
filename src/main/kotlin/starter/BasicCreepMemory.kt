@@ -1,9 +1,9 @@
 package starter
 
-import starter.memoryOrDefault
-import types.base.global.CreepMemory
-import types.extensions.memory.memoryOrDefault
+import screeps.api.CreepMemory
+import screeps.utils.memory.memory
 
-var CreepMemory.building: Boolean by memoryOrDefault(false)
-var CreepMemory.pause: Int by memoryOrDefault(0)
-var CreepMemory.role: Role by memoryOrDefault(Role.UNASSIGNED)
+
+var CreepMemory.building: Boolean by memory { false }
+var CreepMemory.pause: Int by memory { 0 }
+var CreepMemory.role by memory(Role.UNASSIGNED)

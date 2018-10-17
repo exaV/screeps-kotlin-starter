@@ -1,12 +1,10 @@
 package starter
 
-import types.base.global.ERR_NOT_IN_RANGE
-import types.base.global.RESOURCE_ENERGY
-import types.base.global.STRUCTURE_EXTENSION
-import types.base.global.STRUCTURE_SPAWN
-import types.base.prototypes.*
-import types.base.prototypes.structures.StructureController
-import types.base.prototypes.structures.StructureSpawn
+import screeps.api.*
+import screeps.api.structures.Structure
+import screeps.api.structures.StructureController
+import screeps.api.structures.StructureSpawn
+
 
 enum class Role {
     UNASSIGNED,
@@ -14,6 +12,10 @@ enum class Role {
     BUILDER,
     UPGRADER
 }
+
+fun Room.findEnergy() = find<Source>(FIND_SOURCES)
+fun Room.findConstructionSites() = find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES)
+fun Room.findMyStructures() = find<Structure>(FIND_MY_STRUCTURES)
 
 fun Creep.upgrade(controller: StructureController) {
     if (carry.energy == 0) {
@@ -71,10 +73,10 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
             moveTo(sources[0].pos)
         }
     } else {
-        val targets = toRoom.findStructures()
-                .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
-                .map { (it as StructureSpawn) }
-                .filter { it.energy < it.energyCapacity }
+        val targets = toRoom.findMyStructures()
+            .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
+            .map { (it as StructureSpawn) }
+            .filter { it.energy < it.energyCapacity }
 
         if (targets.isNotEmpty()) {
             if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {

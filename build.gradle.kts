@@ -15,22 +15,22 @@ repositories {
 }
 
 dependencies {
-    compile("ch.delconte.screeps-kotlin:screeps-kotlin-types:0.9.10")
+    compile("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.0.0")
 }
 
 val screepsUser: String by project
 val screepsPassword: String by project
-val host: String? by project
-val branch: String? by project
-val defaultBranch = "kotlin-start"
-val defaultHost = "https://screeps.com"
+val screepsHost: String? by project
+val screepsBranch: String? by project
+val branch = screepsBranch ?: "kotlin-start"
+val host = screepsHost ?: "https://screeps.com"
 
 fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
 
 tasks {
     "compileKotlin2Js"(Kotlin2JsCompile::class) {
         kotlinOptions {
-            moduleKind = "umd"
+            moduleKind = "commonjs"
             outputFile = "${buildDir}/screeps/main.js"
             sourceMap = true
             metaInfo = true
@@ -48,17 +48,19 @@ tasks {
         val modules = mutableMapOf<String, String>()
 
         httpMethod = "post"
-        uri = "${host ?: defaultHost}/api/user/code"
+        uri = "$host/api/user/code"
         requestHeaders = mapOf("Authorization" to "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
         contentType = groovyx.net.http.ContentType.JSON
         requestBody = mapOf("branch" to branch, "modules" to modules)
 
         doFirst {
+            println("pushing $screepsUser's code to branch $branch on server $host")
+
             modules.putAll(File("$buildDir/kotlin-js-min/main")
                 .listFiles { _, name -> name.endsWith(".js") }
                 .associate { it.nameWithoutExtension to it.readText() })
-
         }
+
     }
 }
 
