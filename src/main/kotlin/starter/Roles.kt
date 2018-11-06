@@ -13,13 +13,9 @@ enum class Role {
     UPGRADER
 }
 
-fun Room.findEnergy() = find<Source>(FIND_SOURCES)
-fun Room.findConstructionSites() = find<ConstructionSite>(FIND_MY_CONSTRUCTION_SITES)
-fun Room.findMyStructures() = find<Structure>(FIND_MY_STRUCTURES)
-
 fun Creep.upgrade(controller: StructureController) {
     if (carry.energy == 0) {
-        val sources = room.findEnergy()
+        val sources = room.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
         }
@@ -52,14 +48,14 @@ fun Creep.build(assignedRoom: Room = this.room) {
     }
 
     if (memory.building) {
-        val targets = assignedRoom.findConstructionSites()
+        val targets = assignedRoom.find(FIND_MY_CONSTRUCTION_SITES)
         if (targets.isNotEmpty()) {
             if (build(targets[0]) == ERR_NOT_IN_RANGE) {
                 moveTo(targets[0].pos)
             }
         }
     } else {
-        val sources = room.findEnergy()
+        val sources = room.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
         }
@@ -68,12 +64,12 @@ fun Creep.build(assignedRoom: Room = this.room) {
 
 fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
     if (carry.energy < carryCapacity) {
-        val sources = fromRoom.findEnergy()
+        val sources = fromRoom.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
         }
     } else {
-        val targets = toRoom.findMyStructures()
+        val targets = toRoom.find(FIND_MY_STRUCTURES)
             .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
             .map { (it as StructureSpawn) }
             .filter { it.energy < it.energyCapacity }

@@ -5,8 +5,8 @@ import java.io.File
 import java.util.*
 
 plugins {
-    id("kotlin2js") version "1.2.70"
-    id("kotlin-dce-js") version "1.2.70"
+    id("kotlin2js") version "1.3.0"
+    id("kotlin-dce-js") version "1.3.0"
     id("org.tenne.rest") version "0.4.2"
 }
 
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.0.0")
+    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.0.3")
 }
 
 val screepsUser: String by project
