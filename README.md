@@ -6,6 +6,8 @@ The AI included in this project is roughly what you have after completing the of
 
 Feel free to copy/fork this repository to bootstrap your own AI.
 
+Join the official screeps slack on https://chat.screeps.com/ and join #kotlin for help and general screeps kotlin chat.
+
 ### Code upload
 
 Deployment is automated with gradle. 
