@@ -3,6 +3,7 @@ package starter
 
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
+import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
 import screeps.utils.unsafe.jsObject
 
@@ -99,7 +100,7 @@ private fun spawnCreeps(
 }
 
 private fun houseKeeping(creeps: Record<String, Creep>) {
-    js("if(!Memory.creeps){return;}") // this is needed because in the first tick Memory.X is undefined
+    if (Game.creeps.isEmpty()) return  // this is needed because Memory.creeps is undefined
 
     for ((creepName, _) in Memory.creeps) {
         if (creeps[creepName] == null) {
