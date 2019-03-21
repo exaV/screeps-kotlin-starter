@@ -8,6 +8,19 @@ Feel free to copy/fork this repository to bootstrap your own AI.
 
 Join the official screeps slack on https://chat.screeps.com/ and join #kotlin for help and general screeps kotlin chat.
 
+### Getting started
+
+This AI tries to build a 'big' harvester creep with __4__ work parts which cost a hefty 550 energy!
+
+If you are familiar with the official tutorials (if not do them now!) you already know this requires multiple extensions 
+and thus RCL 2. Once you run the bot in the simulator you will notice it takes quite a while to get there, because
+this bot is quite dumb. Below are a few things you could improve that will also help you learn a bit about screeps-kotlin:
+
+* make the upgrader transport 50 energy per run (instead of only 2)
+* harvest from more than just one Source
+* harvest from the closest Source first
+* don't build the extensions at hardcoded locations
+
 ### Code upload
 
 Deployment is automated with gradle. 

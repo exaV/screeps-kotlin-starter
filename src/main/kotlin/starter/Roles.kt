@@ -1,9 +1,7 @@
 package starter
 
 import screeps.api.*
-import screeps.api.structures.Structure
 import screeps.api.structures.StructureController
-import screeps.api.structures.StructureSpawn
 
 
 enum class Role {
@@ -70,9 +68,8 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
         }
     } else {
         val targets = toRoom.find(FIND_MY_STRUCTURES)
-            .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
-            .map { (it as StructureSpawn) }
-            .filter { it.energy < it.energyCapacity }
+                .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
+                .filter { it.unsafeCast<EnergyContainer>().energy < it.unsafeCast<EnergyContainer>().energyCapacity }
 
         if (targets.isNotEmpty()) {
             if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
