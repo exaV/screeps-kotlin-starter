@@ -22,6 +22,7 @@ dependencies {
 
 val screepsUser: String by project
 val screepsPassword: String by project
+val screepsToken: String? by project
 val screepsHost: String? by project
 val screepsBranch: String? by project
 val branch = screepsBranch ?: "kotlin-start"
@@ -51,7 +52,10 @@ tasks {
 
         httpMethod = "post"
         uri = "$host/api/user/code"
-        requestHeaders = mapOf("Authorization" to "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
+        requestHeaders = if(screepsToken != null)
+            mapOf("X-Token" to screepsToken)
+        else
+            mapOf("Authorization" to "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
         contentType = groovyx.net.http.ContentType.JSON
         requestBody = mapOf("branch" to branch, "modules" to modules)
 
