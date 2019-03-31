@@ -35,7 +35,6 @@ Credentials must be provided in a `gradle.properties` file in the root folder of
 
 Alternatively, you can set up an [auth token](https://screeps.com/a/#!/account/auth-tokens) instead of a password (only for official servers)
 
-    screepsUser=<your-username>
     screepsToken=<your-token>
     screepsHost=https://screeps.com (optional)
     screepsBranch=kotlin-start (optional)
