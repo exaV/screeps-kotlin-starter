@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 import java.util.*
 
 plugins {
-    id("kotlin2js") version "1.3.21"
-    id("kotlin-dce-js") version "1.3.21"
+    id("kotlin2js") version "1.3.31"
+    id("kotlin-dce-js") version "1.3.31"
     id("org.tenne.rest") version "0.4.2"
 }
 
@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.2.0")
+    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.3.0")
     implementation(kotlin("stdlib-js"))
     testImplementation(kotlin("test-js"))
 }
@@ -44,14 +44,11 @@ tasks {
         dceOptions.devMode = false
     }
 
-    register("deploy", RestTask::class) {
+    register<RestTask>("deploy") {
         group = "screeps"
         dependsOn("build")
         val modules = mutableMapOf<String, String>()
-
-        if (screepsUser == null && screepsPassword == null && screepsToken == null) {
-            throw InvalidUserDataException("you need to supply either screepsUser and screepsPassword or screepsToken")
-        }
+        val minifiedCodeLocation = File("$buildDir/kotlin-js-min/main")
 
         httpMethod = "post"
         uri = "$host/api/user/code"
@@ -63,11 +60,17 @@ tasks {
         requestBody = mapOf("branch" to branch, "modules" to modules)
 
         doFirst {
-            println("pushing your code to branch $branch on server $host")
+            if (screepsUser == null && screepsPassword == null && screepsToken == null) {
+                throw InvalidUserDataException("you need to supply either screepsUser and screepsPassword or screepsToken before you can upload code")
+            }
+            if (!minifiedCodeLocation.isDirectory) {
+                throw InvalidUserDataException("found no code to upload at ${minifiedCodeLocation.path}")
+            }
 
-            modules.putAll(File("$buildDir/kotlin-js-min/main")
-                    .listFiles { _, name -> name.endsWith(".js") }
-                    .associate { it.nameWithoutExtension to it.readText() })
+            val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }
+            modules.putAll(jsFiles.associate { it.nameWithoutExtension to it.readText() })
+
+            println("uploading ${jsFiles.count()} files to branch $branch on server $host")
         }
 
     }
