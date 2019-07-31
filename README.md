@@ -24,7 +24,7 @@ this bot is quite dumb. Below are a few things you could improve that will also 
 ### Code upload
 
 Deployment is automated with gradle. 
-The branch `kotlin-start` is used by default, [make sure it exists](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches).
+The branch `kotlin-start` is used by default, [make sure it exists on the server](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches) (it will fail silently otherwise).
 
 Credentials must be provided in a `gradle.properties` file in the root folder of the project.
     
@@ -61,3 +61,7 @@ This can be very useful to store non-essential but expensive-to-calculate data, 
 It is highly recommended to use Isolated Virtual Machine (IVM) if you intend to make use of stateful Singletons.
 
 
+### Troubleshooting
+
+#### Gradle says it deployed correctly, but my code doesnt show up.
+  Make sure you deployed to a branch which exists on the Server, if not it will fail silently.
