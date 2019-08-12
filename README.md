@@ -49,17 +49,11 @@ Standalone types are available here: https://github.com/exaV/screeps-kotlin-type
 
 ### Performance
 Kotlin compiles to plain javascript, similar to Typescript. There is no runtime overhead.
-The major difference is that kotlin ships with a separate 1.5MB standard library. While it does not significantly slow us down,
-it does increase script load time and more importantly almost fills the code-size limit. 
-This project uses the Dead-Code-Elimination-Plugin (kotlin-dce-js) 
-to drastically reduce the size of all dependencies (e.g. stdlib is 186KB).
+The major difference is that kotlin ships with a separate 1.5MB standard library. We recommend to use the the Dead-Code-Elimination-Plugin 'kotlin-dce-js', like this project does, to drastically reduce the size of all dependencies (e.g. stdlib is 180kb afterwards).
 
 ### A note on `Object`
 Kotlin's `Object` Singletons persist over multiple ticks. 
 This can be very useful to store non-essential but expensive-to-calculate data, especially in combination with `lazy()`
-
-It is highly recommended to use Isolated Virtual Machine (IVM) if you intend to make use of stateful Singletons.
-
 
 ### Troubleshooting
 
