@@ -82,7 +82,7 @@ private fun spawnCreeps(
         creeps.none { it.memory.role == Role.UPGRADER } -> Role.UPGRADER
 
         spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() &&
-                creeps.count { it.memory.role == Role.HARVESTER } < 2 -> Role.BUILDER
+                creeps.count { it.memory.role == Role.BUILDER } < 2 -> Role.BUILDER
 
         else -> return
     }
