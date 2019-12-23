@@ -1,28 +1,18 @@
-dist: trusty
-root: required
 language: java
+install: true
 
-os:
-  - linux
-
-env:
-  - V=2.0.0
-
-before_install:
-  - OS=linux
-  - ARCH=x86_64
-  - GH_BASE="https://github.com/bazelbuild/bazel/releases/download/$V"
-  - GH_ARTIFACT="bazel-$V-installer-$OS-$ARCH.sh"
-  - URL="$GH_BASE/$GH_ARTIFACT"
-  - echo $URL
-  - wget -O install.sh $URL
-  - chmod +x install.sh
-  - ./install.sh --user
-  - rm -f install.sh
+os: linux
+dist: trusty
+jdk: oraclejdk8
 
 script:
-  - bazel build -k //...
-  # - bazel --bazelrc=tools/bazel.travis.rc test -k //...
-  # - format/run --verify
-  # - sync-deps/run --verify
-  # - ./integration-test
+  - ./gradlew build --scan -s
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
