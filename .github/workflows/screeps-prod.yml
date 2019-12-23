@@ -1,0 +1,25 @@
+name: CI
+
+on: [push]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Download Bazel
+      env:
+        BAZEL_VERSION: 2.0.0
+        OS: linux
+        ARCH: x86_64
+        GH_BASE: https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION
+        GH_ARTIFACT: bazel-$BAZEL_VERSION-installer-$OS-$ARCH.sh"
+        URL: $GH_BASE/$GH_ARTIFACT
+      run: echo wget -O install.sh $URL
+      
+    - name: Install Bazel
+      run: |
+        chmod +x install.sh
+        ./install.sh --user
+        rm -f install.sh

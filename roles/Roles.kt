@@ -1,15 +1,8 @@
-package starter
+package io.r2n.screeps.ai.roles
 
 import screeps.api.*
 import screeps.api.structures.StructureController
 
-
-enum class Role {
-    UNASSIGNED,
-    HARVESTER,
-    BUILDER,
-    UPGRADER
-}
 
 fun Creep.upgrade(controller: StructureController) {
     if (carry.energy == 0) {
