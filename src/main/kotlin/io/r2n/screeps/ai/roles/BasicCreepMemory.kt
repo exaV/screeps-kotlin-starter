@@ -1,6 +1,5 @@
 package io.r2n.screeps.ai.roles
 
-import io.r2n.screeps.ai.roles.Role
 import screeps.api.CreepMemory
 import screeps.utils.memory.memory
 

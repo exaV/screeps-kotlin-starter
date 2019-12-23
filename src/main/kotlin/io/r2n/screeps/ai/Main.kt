@@ -8,5 +8,5 @@ package io.r2n.screeps.ai
  */
 @Suppress("unused")
 fun loop() {
-//    gameLoop()
+    gameLoop()
 }
