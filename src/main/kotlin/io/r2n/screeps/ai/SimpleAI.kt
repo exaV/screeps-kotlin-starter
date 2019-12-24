@@ -82,7 +82,7 @@ private fun spawnCreeps(
 ) {
 
     val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
-    val maxHarvesters = 6
+    val maxHarvesters = 4
     val maxUpgraders = 3
 
     if (spawn.room.energyAvailable < body.sumBy { BODYPART_COST[it]!! }) {
@@ -95,7 +95,7 @@ private fun spawnCreeps(
         creeps.count { it.memory.role == Role.UPGRADER } <= maxUpgraders -> Role.UPGRADER
 
         spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() &&
-                thereAreMoreHarvestersThanBuilders(creeps, delta = 3) -> Role.BUILDER
+                thereAreMoreHarvestersThanBuilders(creeps, delta = 1) -> Role.BUILDER
 
         else -> return
     }
