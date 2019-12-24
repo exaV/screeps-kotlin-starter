@@ -5,7 +5,7 @@ import java.util.*
 
 plugins {
     id("kotlin2js") version "1.3.31"
-    id("kotlin-dce-js") version "1.3.31"
+//    id("kotlin-dce-js") version "1.3.31"
     id("org.tenne.rest") version "0.4.2"
 }
 
@@ -19,12 +19,12 @@ dependencies {
     testImplementation(kotlin("test-js"))
 }
 
-val screepsUser: String? by project
-val screepsPassword: String? by project
-val screepsToken: String? by project
-val screepsHost: String? by project
-val screepsBranch: String? by project
-val branch = screepsBranch ?: "kotlin-start"
+val screepsUser: String? by extra(System.getenv("screepsUser"))
+val screepsPassword: String? by extra(System.getenv("screepsPassword"))
+val screepsToken: String? by extra(System.getenv("screepsToken"))
+val screepsHost: String? by extra(System.getenv("screepsHost"))
+val screepsBranch: String? by extra(System.getenv("screepsBranch"))
+val branch = screepsBranch ?: "master"
 val host = screepsHost ?: "https://screeps.com"
 
 fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
@@ -39,10 +39,10 @@ tasks {
         }
     }
 
-    "runDceKotlinJs"(KotlinJsDce::class) {
-        keep("main.loop")
-        dceOptions.devMode = false
-    }
+//    "runDceKotlinJs"(KotlinJsDce::class) {
+//        keep("main.loop")
+//        dceOptions.devMode = true
+//    }
 
     register<RestTask>("deploy") {
         group = "screeps"
