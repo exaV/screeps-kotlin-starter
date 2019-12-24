@@ -1,24 +1,32 @@
 language: java
 install: true
-
 os: linux
 dist: trusty
 jdk: oraclejdk8
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+env:
+  global:
+    secure: AJsGJCFUmu2naxZhwKbBpnxUqwmgy8GuXh1J+umFiLWA77rLPtKWKXVTQj5623ahxZ6cnOiNZybgKAVZlrS8TqP0aEAQsEu9OXt4kh/2DuUFrwCGLgtzo5QVJo6D7WdWl8F0psdgE1yW0styvLKdaq3O1iQtDsiJb8Jfk3/HLMuTY2YIgK2I+jLA7mmiPB3Jiw0w0nTDLFTCWnCxJudWpW9fdHcNetl1GNUbDy/nHP5QnaFpoKy4KeNgsDxigMk3PXrhX7t1dIQ5SDtYh5PYg6gvVr3ieYKSOtJuO2b+Z8GwKgIio0puG+Yg+CIOTI3BzeKsXdGefi6gAfvQ8govTtbJD7boCPpO4058FdqSlUXx/XG2Tp9BR7knsLehW/Jtl6uDgOO/aVGKI6NgOyGvBATuj5PvtbZF8/V8dhQVpDivxcFOsp3Q3XkVTSD5w7jWkMILp9Ws0/NipTVarEiEXJA8UzOfs/bjEqPCbrTSmTlOtzUaCrCtVNTYHzlqkv4Y8kWwjOyDiqVKXdcsSzGBVxmLMevuyxGWSQD0OkoAEOKka3YG+uvngIIe4B58hlnNR6uCQiqyAtWyTcYLfscMIG4jInhCyrFwT6kd7D51K+3hvnSnw59aSdEaaT7yp3TwaRlrQZpRWSECwdePQ6YOxne0yZpD2Yfj1T5K8Mvqar0=
 
+addons:
+  sonarcloud:
+    organization: "rhinomcd"
+    token:
+      secure: "AJsGJCFUmu2naxZhwKbBpnxUqwmgy8GuXh1J+umFiLWA77rLPtKWKXVTQj5623ahxZ6cnOiNZybgKAVZlrS8TqP0aEAQsEu9OXt4kh/2DuUFrwCGLgtzo5QVJo6D7WdWl8F0psdgE1yW0styvLKdaq3O1iQtDsiJb8Jfk3/HLMuTY2YIgK2I+jLA7mmiPB3Jiw0w0nTDLFTCWnCxJudWpW9fdHcNetl1GNUbDy/nHP5QnaFpoKy4KeNgsDxigMk3PXrhX7t1dIQ5SDtYh5PYg6gvVr3ieYKSOtJuO2b+Z8GwKgIio0puG+Yg+CIOTI3BzeKsXdGefi6gAfvQ8govTtbJD7boCPpO4058FdqSlUXx/XG2Tp9BR7knsLehW/Jtl6uDgOO/aVGKI6NgOyGvBATuj5PvtbZF8/V8dhQVpDivxcFOsp3Q3XkVTSD5w7jWkMILp9Ws0/NipTVarEiEXJA8UzOfs/bjEqPCbrTSmTlOtzUaCrCtVNTYHzlqkv4Y8kWwjOyDiqVKXdcsSzGBVxmLMevuyxGWSQD0OkoAEOKka3YG+uvngIIe4B58hlnNR6uCQiqyAtWyTcYLfscMIG4jInhCyrFwT6kd7D51K+3hvnSnw59aSdEaaT7yp3TwaRlrQZpRWSECwdePQ6YOxne0yZpD2Yfj1T5K8Mvqar0="
 jobs:
   include:
     - stage: build
       script:
-        - ./gradlew build --scan -s
+        - "./gradlew build --build-cache --scan -s"
+    - stage: sonar
+      script:
+        - ./gradlew sonarqube
     - stage: deploy
       script:
-      - ./gradlew deploy --scan -s
-
-before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
+        - "./gradlew deploy --scan -s"

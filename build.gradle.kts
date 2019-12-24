@@ -7,6 +7,8 @@ plugins {
     id("kotlin2js") version "1.3.31"
     id("kotlin-dce-js") version "1.3.31"
     id("org.tenne.rest") version "0.4.2"
+    id("org.sonarqube") version "2.8"
+
 }
 
 repositories {
@@ -76,3 +78,10 @@ tasks {
     }
 }
 
+sonarqube {
+    properties {
+        property("sonar.projectKey", "Rhinomcd_screeps-kotlin")
+        property("sonar.organization", "rhinomcd")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
