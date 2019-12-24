@@ -11,14 +11,17 @@ enum class Role {
 }
 
 fun Creep.upgrade(controller: StructureController) {
-    if (carry.energy == 0) {
+    if (carry.energy < carryCapacity && !memory.upgrading) {
         val sources = room.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
         }
     } else {
+        memory.upgrading = true
         if (upgradeController(controller) == ERR_NOT_IN_RANGE) {
             moveTo(controller.pos)
+        } else if (upgradeController(controller) == ERR_NOT_ENOUGH_ENERGY) {
+           memory.upgrading = false
         }
     }
 }

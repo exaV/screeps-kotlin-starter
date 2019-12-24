@@ -1,4 +1,4 @@
-package io.r2n.screeps.ai
+import io.r2n.screeps.ai.gameLoop
 
 /**
  * Entry point
@@ -9,5 +9,4 @@ package io.r2n.screeps.ai
 @Suppress("unused")
 fun loop() {
     gameLoop()
-    console.log("debug loop")
 }

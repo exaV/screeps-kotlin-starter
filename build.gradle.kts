@@ -5,7 +5,7 @@ import java.util.*
 
 plugins {
     id("kotlin2js") version "1.3.31"
-//    id("kotlin-dce-js") version "1.3.31"
+    id("kotlin-dce-js") version "1.3.31"
     id("org.tenne.rest") version "0.4.2"
 }
 
@@ -39,10 +39,10 @@ tasks {
         }
     }
 
-//    "runDceKotlinJs"(KotlinJsDce::class) {
-//        keep("main.loop")
-//        dceOptions.devMode = true
-//    }
+    "runDceKotlinJs"(KotlinJsDce::class) {
+        keep("main.loop")
+        dceOptions.devMode = false
+    }
 
     register<RestTask>("deploy") {
         group = "screeps"
