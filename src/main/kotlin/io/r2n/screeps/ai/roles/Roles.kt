@@ -72,10 +72,9 @@ fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
                 .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
                 .filter { it.unsafeCast<EnergyContainer>().energy < it.unsafeCast<EnergyContainer>().energyCapacity }
 
-        if (targets.isNotEmpty()) {
-            if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                moveTo(targets[0].pos)
-            }
+        if (targets.isNotEmpty() &&
+                transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            moveTo(targets[0].pos)
         }
     }
 }
