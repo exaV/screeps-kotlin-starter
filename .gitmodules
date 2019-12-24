@@ -1,0 +1,3 @@
+[submodule "monitoring/screeps-grafana"]
+	path = monitoring/screeps-grafana
+	url = https://github.com/screepers/screeps-grafana

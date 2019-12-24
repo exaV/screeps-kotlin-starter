@@ -21,7 +21,7 @@ fun Creep.upgrade(controller: StructureController) {
         if (upgradeController(controller) == ERR_NOT_IN_RANGE) {
             moveTo(controller.pos)
         } else if (upgradeController(controller) == ERR_NOT_ENOUGH_ENERGY) {
-           memory.upgrading = false
+            memory.upgrading = false
         }
     }
 }
@@ -48,11 +48,10 @@ fun Creep.build(assignedRoom: Room = this.room) {
     }
 
     if (memory.building) {
-        val targets = assignedRoom.find(FIND_MY_CONSTRUCTION_SITES)
-        if (targets.isNotEmpty()) {
-            if (build(targets[0]) == ERR_NOT_IN_RANGE) {
-                moveTo(targets[0].pos)
-            }
+        val assignedBuildingSite = pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
+        if (assignedBuildingSite != null &&
+                build(assignedBuildingSite) == ERR_NOT_IN_RANGE) {
+            moveTo(assignedBuildingSite)
         }
     } else {
         val sources = room.find(FIND_SOURCES)

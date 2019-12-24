@@ -66,24 +66,36 @@ fun gameLoop() {
 
 }
 
+
+fun thereAreMoreHarvestersThanBuilders(creeps: Array<Creep>, delta: Int): Boolean {
+    return creeps.count { it.memory.role == Role.HARVESTER } >
+            creeps.count() { it.memory.role == Role.BUILDER } + delta
+}
+
+fun thereAreMoreBuildersThanHarvesters(creeps: Array<Creep>, delta: Int = 0): Boolean {
+    return !thereAreMoreBuildersThanHarvesters(creeps, delta)
+}
+
 private fun spawnCreeps(
         creeps: Array<Creep>,
         spawn: StructureSpawn
 ) {
 
     val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
+    val maxHarvesters = 6
+    val maxUpgraders = 3
 
     if (spawn.room.energyAvailable < body.sumBy { BODYPART_COST[it]!! }) {
         return
     }
 
     val role: Role = when {
-        creeps.count { it.memory.role == Role.HARVESTER } < 2 -> Role.HARVESTER
+        creeps.count {it.memory.role == Role.HARVESTER} <= maxHarvesters -> Role.HARVESTER
 
-        creeps.none { it.memory.role == Role.UPGRADER } -> Role.UPGRADER
+        creeps.count { it.memory.role == Role.UPGRADER } <= maxUpgraders -> Role.UPGRADER
 
         spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() &&
-                creeps.count { it.memory.role == Role.BUILDER } < 2 -> Role.BUILDER
+                thereAreMoreHarvestersThanBuilders(creeps, delta = 3) -> Role.BUILDER
 
         else -> return
     }
