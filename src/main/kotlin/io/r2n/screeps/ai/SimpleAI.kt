@@ -90,7 +90,7 @@ private fun spawnCreeps(
     }
 
     val role: Role = when {
-        creeps.count {it.memory.role == Role.HARVESTER} <= maxHarvesters -> Role.HARVESTER
+        creeps.count { it.memory.role == Role.HARVESTER } <= maxHarvesters -> Role.HARVESTER
 
         creeps.count { it.memory.role == Role.UPGRADER } <= maxUpgraders -> Role.UPGRADER
 
@@ -101,9 +101,15 @@ private fun spawnCreeps(
     }
 
     val newName = "${role.name}_${Game.time}"
-    val code = spawn.spawnCreep(body, newName, options {
-        memory = jsObject<CreepMemory> { this.role = role }
-    })
+
+    val code = when (role) {
+        Role.HARVESTER -> Miner.spawn(spawn)
+        else -> {
+            spawn.spawnCreep(body, newName, options {
+                memory = jsObject<CreepMemory> { this.role = role }
+            })
+        }
+    }
 
     when (code) {
         OK -> console.log("spawning $newName with body $body")
