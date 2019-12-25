@@ -10,6 +10,9 @@ import screeps.utils.unsafe.jsObject
 
 fun gameLoop() {
     val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
+    if (Memory.sources.isEmpty()) {
+        Memory.sources = mainSpawn.room.find(FIND_SOURCES)
+    }
 
     //delete memories of creeps that have passed away
     houseKeeping(Game.creeps)
@@ -58,6 +61,8 @@ fun gameLoop() {
     for ((_, creep) in Game.creeps) {
         when (creep.memory.role) {
             Role.HARVESTER -> creep.harvest()
+            Role.MINER -> creep.mine()
+            Role.RUNNER -> creep.run()
             Role.BUILDER -> creep.build()
             Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
             else -> creep.pause()
@@ -66,56 +71,58 @@ fun gameLoop() {
 
 }
 
+private fun spawnCreeps(creeps: Array<Creep>, spawn: StructureSpawn) {
 
-fun thereAreMoreHarvestersThanBuilders(creeps: Array<Creep>, delta: Int): Boolean {
-    return creeps.count { it.memory.role == Role.HARVESTER } >
-            creeps.count() { it.memory.role == Role.BUILDER } + delta
-}
-
-fun thereAreMoreBuildersThanHarvesters(creeps: Array<Creep>, delta: Int = 0): Boolean {
-    return !thereAreMoreBuildersThanHarvesters(creeps, delta)
-}
-
-private fun spawnCreeps(
-        creeps: Array<Creep>,
-        spawn: StructureSpawn
-) {
-
-    val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
-    val maxHarvesters = 4
+    val maxHarvesters = 1
+    val maxGatherSquad = Memory.sources.size
     val maxUpgraders = 3
 
-    if (spawn.room.energyAvailable < body.sumBy { BODYPART_COST[it]!! }) {
-        return
-    }
-
     val role: Role = when {
-        creeps.count { it.memory.role == Role.HARVESTER } <= maxHarvesters -> Role.HARVESTER
+        //First creep should be a harvester, then roll out the big bois
+        creeps.none { it.memory.role == Role.MINER } &&
+                creeps.count {
+                    it.memory.role == Role.HARVESTER
+                } <= maxHarvesters -> Role.HARVESTER
+
+        //Setup gather goons first
+        creeps.none { it.memory.role == Role.MINER } -> Role.MINER
+        creeps.none { it.memory.role == Role.RUNNER } -> Role.RUNNER
+        creeps.count { it.memory.role == Role.MINER } <= maxGatherSquad -> Role.MINER
+        creeps.count { it.memory.role == Role.RUNNER } <= maxGatherSquad -> Role.RUNNER
 
         creeps.count { it.memory.role == Role.UPGRADER } <= maxUpgraders -> Role.UPGRADER
 
-        spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() &&
-                thereAreMoreHarvestersThanBuilders(creeps, delta = 1) -> Role.BUILDER
+        spawn.room.find(FIND_MY_CONSTRUCTION_SITES).isNotEmpty() -> Role.BUILDER
 
         else -> return
     }
 
-    val newName = "${role.name}_${Game.time}"
 
-    val code = when (role) {
-        Role.HARVESTER -> Miner.spawn(spawn)
-        else -> {
-            spawn.spawnCreep(body, newName, options {
-                memory = jsObject<CreepMemory> { this.role = role }
-            })
+    when (role) {
+        Role.MINER -> {
+            if (Miner.spawn(spawn, 300) == OK) {
+                Memory.lastMinerAssignment = incrementLastMinerAssignment()
+            }
         }
+        Role.RUNNER -> Runner.spawn(spawn)
+        Role.BUILDER -> Builder.spawn(spawn)
+        Role.HARVESTER -> Harvester.spawn(spawn)
+        Role.UPGRADER -> Upgrader.spawn(spawn)
+        else -> console.log("ERROR - can't spawn unassigned creep")
     }
+}
 
-    when (code) {
-        OK -> console.log("spawning $newName with body $body")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { } // do nothing
-        else -> console.log("unhandled error code $code")
-    }
+fun incrementLastMinerAssignment(): Int {
+    console.log("increment last miner")
+    return if (Memory.lastMinerAssignment + 1 < Memory.sources.size)
+        Memory.lastMinerAssignment + 1
+    else
+        0
+
+}
+
+fun getBodyCost(bodyParts: Array<BodyPartConstant>): Int {
+    return bodyParts.sumBy { BODYPART_COST[it]!! }
 }
 
 private fun houseKeeping(creeps: Record<String, Creep>) {

@@ -4,7 +4,6 @@ import screeps.api.CreepMemory
 import screeps.utils.memory.memory
 
 
-var CreepMemory.building: Boolean by memory { false }
-var CreepMemory.upgrading: Boolean by memory { false }
+var CreepMemory.working: Boolean by memory { false }
 var CreepMemory.pause: Int by memory { 0 }
-var CreepMemory.role by memory(Role.UNASSIGNED)
+var CreepMemory.role: Enum<Role> by memory(Role.UNASSIGNED)
