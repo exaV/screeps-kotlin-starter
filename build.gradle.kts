@@ -1,13 +1,16 @@
 import org._10ne.gradle.rest.RestTask
+import org.ajoberstar.grgit.Grgit
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsDce
 import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
 import java.util.*
+
 
 plugins {
     id("kotlin2js") version "1.3.31"
     id("kotlin-dce-js") version "1.3.31"
     id("org.tenne.rest") version "0.4.2"
     id("org.sonarqube") version "2.8"
+    id("org.ajoberstar.grgit") version "1.7.2"
 
 }
 
@@ -26,7 +29,11 @@ val screepsPassword: String? by extra(System.getenv("screepsPassword"))
 val screepsToken: String? by extra(System.getenv("screepsToken"))
 val screepsHost: String? by extra(System.getenv("screepsHost"))
 val screepsBranch: String? by extra(System.getenv("screepsBranch"))
-val branch = screepsBranch ?: "master"
+val branch = if (Grgit.open().branch.current.name != "master") {
+    "beta-kt"
+} else {
+    "master-kt"
+}
 val host = screepsHost ?: "https://screeps.com"
 
 fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
