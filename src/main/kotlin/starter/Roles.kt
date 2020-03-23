@@ -12,7 +12,8 @@ enum class Role {
 }
 
 fun Creep.upgrade(controller: StructureController) {
-    if (carry.energy == 0) {
+
+    if (store[RESOURCE_ENERGY] == 0) {
         val sources = room.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
@@ -36,11 +37,11 @@ fun Creep.pause() {
 }
 
 fun Creep.build(assignedRoom: Room = this.room) {
-    if (memory.building && carry.energy == 0) {
+    if (memory.building && store[RESOURCE_ENERGY] == 0) {
         memory.building = false
         say("🔄 harvest")
     }
-    if (!memory.building && carry.energy == carryCapacity) {
+    if (!memory.building && store[RESOURCE_ENERGY] == store.getCapacity()) {
         memory.building = true
         say("🚧 build")
     }
@@ -61,15 +62,15 @@ fun Creep.build(assignedRoom: Room = this.room) {
 }
 
 fun Creep.harvest(fromRoom: Room = this.room, toRoom: Room = this.room) {
-    if (carry.energy < carryCapacity) {
+    if (store[RESOURCE_ENERGY]!! < store.getCapacity()) {
         val sources = fromRoom.find(FIND_SOURCES)
         if (harvest(sources[0]) == ERR_NOT_IN_RANGE) {
             moveTo(sources[0].pos)
         }
     } else {
         val targets = toRoom.find(FIND_MY_STRUCTURES)
-                .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
-                .filter { it.unsafeCast<EnergyContainer>().energy < it.unsafeCast<EnergyContainer>().energyCapacity }
+            .filter { (it.structureType == STRUCTURE_EXTENSION || it.structureType == STRUCTURE_SPAWN) }
+            .filter { it.unsafeCast<StoreOwner>().store[RESOURCE_ENERGY]!! < it.unsafeCast<StoreOwner>().store.getCapacity() }
 
         if (targets.isNotEmpty()) {
             if (transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
