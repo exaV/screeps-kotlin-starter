@@ -13,6 +13,9 @@ fun gameLoop() {
     //delete memories of creeps that have passed away
     houseKeeping(Game.creeps)
 
+    // just an example of how to use room memory
+    mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
+
     //make sure we have at least some creeps
     spawnCreeps(Game.creeps.values, mainSpawn)
 
