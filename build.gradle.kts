@@ -67,7 +67,7 @@ tasks.register<RestTask>("deploy") {
     val minifiedCodeLocation = File(minifiedJsDirectory)
 
     doFirst {
-        if (screepsUser == null && screepsPassword == null && screepsToken == null) {
+        if (screepsToken == null && (screepsUser == null || screepsPassword == null)) {
             throw InvalidUserDataException("you need to supply either screepsUser and screepsPassword or screepsToken before you can upload code")
         }
         if (!minifiedCodeLocation.isDirectory) {
@@ -75,7 +75,7 @@ tasks.register<RestTask>("deploy") {
         }
 
         val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }.orEmpty()
-        val (mainModule, otherModules) = jsFiles.partition { it.nameWithoutExtension == project.name}
+        val (mainModule, otherModules) = jsFiles.partition { it.nameWithoutExtension == project.name }
 
         val main = mainModule.firstOrNull()
             ?: throw IllegalStateException("Could not find js file corresponding to main module in ${minifiedCodeLocation.absolutePath}. Was looking for ${project.name}.js")
@@ -83,7 +83,7 @@ tasks.register<RestTask>("deploy") {
         modules["main"] = main.readText()
         modules.putAll(otherModules.associate { it.nameWithoutExtension to it.readText() })
 
-        println("uploading ${jsFiles.count()} files to branch $branch on server $host")
+        logger.lifecycle("uploading ${jsFiles.count()} files to branch '$branch' on server $host")
     }
 
 }
