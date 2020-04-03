@@ -7,11 +7,12 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     jcenter()
 }
 
 dependencies {
-    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.6.1")
+    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.9.1")
     implementation(kotlin("stdlib-js"))
     testImplementation(kotlin("test-js"))
 }
@@ -73,7 +74,7 @@ tasks.register<RestTask>("deploy") {
             throw InvalidUserDataException("found no code to upload at ${minifiedCodeLocation.path}")
         }
 
-        val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }
+        val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }.orEmpty()
         val (mainModule, otherModules) = jsFiles.partition { it.nameWithoutExtension == project.name}
 
         val main = mainModule.firstOrNull()
@@ -86,4 +87,3 @@ tasks.register<RestTask>("deploy") {
     }
 
 }
-
