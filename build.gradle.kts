@@ -21,7 +21,7 @@ val screepsPassword: String? by project
 val screepsToken: String? by project
 val screepsHost: String? by project
 val screepsBranch: String? by project
-val branch = screepsBranch ?: "kotlin-start"
+val branch = screepsBranch ?: "default"
 val host = screepsHost ?: "https://screeps.com"
 val minifiedJsDirectory: String = File(buildDir, "minified-js").absolutePath
 

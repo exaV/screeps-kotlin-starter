@@ -23,26 +23,23 @@ this bot is quite dumb. Below are a few things you could improve that will also 
 
 ### Code upload
 
-Deployment is automated with gradle. 
-The branch `kotlin-start` is used by default, [make sure it exists on the server](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches) (it will fail silently otherwise).
+    ./gradlew deploy
 
-Credentials must be provided in a `gradle.properties` file in the root folder of the project.
+Deployment is automated with gradle. 
+The branch `default` branch is used unless you [create a branch](https://support.screeps.com/hc/en-us/articles/203852251-New-feature-code-branches) and change the configuration as described below.
+
+Credentials must be provided in a `gradle.properties` file in the root folder of the project or in `$HOME/.gradle`
     
     screepsUser=<your-username>
     screepsPassword=<your-password>
     screepsHost=https://screeps.com (optional)
-    screepsBranch=kotlin-start (optional)
+    screepsBranch=my-branch (optional)
 
 Alternatively, you can set up an [auth token](https://screeps.com/a/#!/account/auth-tokens) instead of a password (only for official servers)
 
     screepsToken=<your-token>
     screepsHost=https://screeps.com (optional)
     screepsBranch=kotlin-start (optional)
-    
-Usage:
-
-    ./gradlew deploy
-
 
 ### Types
 Standalone types are available here: https://github.com/exaV/screeps-kotlin-types
@@ -50,7 +47,7 @@ Standalone types are available here: https://github.com/exaV/screeps-kotlin-type
 ### Performance
 Kotlin compiles to plain javascript, similar to Typescript. There is no runtime overhead.
 The major difference is that kotlin ships with a separate 1.5MB standard library. 
-We use the the Dead-Code-Elimination 'kotlin-dce-js' to reduce the size of all dependencies (e.g. stdlib is 180kb afterwards).
+We use the Dead-Code-Elimination 'kotlin-dce-js' to reduce the size of all dependencies drastically.
 
 ### A note on `Object`
 Kotlin's `Object` Singletons persist over multiple ticks. 
@@ -59,7 +56,7 @@ This can be very useful to store non-essential but expensive-to-calculate data, 
 ### Troubleshooting
 
 #### Gradle says it deployed correctly, but my code doesnt show up.
-  Make sure you deployed to a branch which exists on the Server, if not it will fail silently.
+Make sure you deployed to a branch which exists on the Server, if not it will fail silently.
 
 #### Imports
 Make sure to `import screeps.api.*` as it includes many useful extension functions which are otherwise hard to find
