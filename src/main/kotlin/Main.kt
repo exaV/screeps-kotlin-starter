@@ -1,5 +1,3 @@
-
-
 import starter.gameLoop
 
 /**
