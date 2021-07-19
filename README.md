@@ -83,6 +83,9 @@ and sparingly use `external interface` instantiated with `screeps.utils.unsafe.j
 
 ### Troubleshooting
 
+#### Important! To upload code to a private server, you must have [screepsmod-auth](https://github.com/ScreepsMods/screepsmod-auth) installed and configured!
+If you're using the 'private server' option in Steam, you can install `screepsmod-auth` from the Steam Workshop.
+
 #### Gradle says it deployed correctly, but my code doesnt show up.
 Make sure you deployed to a branch which exists on the Server, if not it will fail silently.
 
