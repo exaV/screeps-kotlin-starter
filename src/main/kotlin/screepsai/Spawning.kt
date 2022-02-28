@@ -4,7 +4,6 @@ import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
-import screeps.utils.unsafe.jsObject
 
 val SIMPLE_BODY: Array<BodyPartConstant> = arrayOf(WORK, MOVE, CARRY)
 
@@ -15,9 +14,7 @@ fun spawnCreeps(
     val body = SIMPLE_BODY
 
     val newName = "creep_${Game.time}"
-    val code = spawn.spawnCreep(body, newName, options {
-        memory = jsObject<CreepMemory> { this.state = HarvesterState.GATHER.value }
-    })
+    val code = spawn.spawnCreep(body, newName)
 
     when (code) {
         OK -> console.log("spawning $newName with body $body")
