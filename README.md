@@ -6,7 +6,7 @@ The AI included in this project is roughly what you have after completing the of
 
 Feel free to copy/fork this repository to bootstrap your own AI.
 
-Join the official screeps slack on https://chat.screeps.com/ and join #kotlin for help and general screeps kotlin chat.
+Join the official screeps discord on https://discord.com/invite/screeps and join #kotlin for help and general screeps kotlin chat.
 
 ### Getting started
 
@@ -50,8 +50,21 @@ The major difference is that kotlin ships with a separate 1.5MB standard library
 We use the Dead-Code-Elimination 'kotlin-dce-js' to reduce the size of all dependencies drastically.
 
 ### A note on `Object`
-Kotlin's `Object` Singletons persist over multiple ticks. 
+Kotlin's `Object` Singletons and top level val/var declarations persist over multiple ticks. 
 This can be very useful to store non-essential but expensive-to-calculate data, especially in combination with `lazy()`
+
+
+### A note on `Memory`
+Do not store classes (or objects) in memory (`Memory`, `creep.memory` etc.). Instead, use `external interface` or a 
+proper serialisation library. Why? Because `Memory` is serialized/deserialized at the end/start of the tick by the
+screeps engine, causing all objects to lose their prototype which in turn renders classes unusable 
+(calling class methods will throw an exception). 
+
+
+
+The global `Memory` object, as well as `flag.memory`, `creep.memory` etc. which write to global memory, is serialized at the end of each tick.
+At the start of the next tick the Memory object is deserialized. This process will cause objects to lose their prototype information,
+for kotlin users this means classes won't have any methods.
 
 ### Troubleshooting
 

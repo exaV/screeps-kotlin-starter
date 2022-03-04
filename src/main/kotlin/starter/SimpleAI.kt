@@ -75,7 +75,7 @@ private fun spawnCreeps(
 
     val body = arrayOf<BodyPartConstant>(WORK, CARRY, MOVE)
 
-    if (spawn.room.energyAvailable < body.sumBy { BODYPART_COST[it]!! }) {
+    if (spawn.room.energyAvailable < body.sumOf { BODYPART_COST[it]!! }) {
         return
     }
 

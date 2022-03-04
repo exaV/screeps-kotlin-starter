@@ -1,18 +1,17 @@
-import org._10ne.gradle.rest.RestTask
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 
 plugins {
-    kotlin("js") version "1.4.10"
-    id("org.tenne.rest") version "0.4.2"
+    kotlin("js") version "1.6.10"
 }
 
 repositories {
-    mavenLocal()
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
-    implementation("ch.delconte.screeps-kotlin:screeps-kotlin-types:1.12.0")
+    implementation("io.github.exav:screeps-kotlin-types:1.13.0")
     testImplementation(kotlin("test-js"))
 }
 
@@ -50,40 +49,64 @@ kotlin {
 val processDceKotlinJs by tasks.getting(org.jetbrains.kotlin.gradle.dsl.KotlinJsDce::class)
 fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
 
-tasks.register<RestTask>("deploy") {
+
+tasks.register("deploy") {
     group = "screeps"
     dependsOn(processDceKotlinJs)
-    val modules = mutableMapOf<String, String>()
 
-    httpMethod = "post"
-    uri = "$host/api/user/code"
-    requestHeaders = if (screepsToken != null)
-        mapOf("X-Token" to screepsToken)
-    else
-        mapOf("Authorization" to "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
-    contentType = groovyx.net.http.ContentType.JSON
-    requestBody = mapOf("branch" to branch, "modules" to modules)
-
-    val minifiedCodeLocation = File(minifiedJsDirectory)
-
-    doFirst {
+    doFirst { // use doFirst to avoid running this code in configuration phase
         if (screepsToken == null && (screepsUser == null || screepsPassword == null)) {
             throw InvalidUserDataException("you need to supply either screepsUser and screepsPassword or screepsToken before you can upload code")
         }
+        val minifiedCodeLocation = File(minifiedJsDirectory)
         if (!minifiedCodeLocation.isDirectory) {
             throw InvalidUserDataException("found no code to upload at ${minifiedCodeLocation.path}")
         }
 
         val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }.orEmpty()
         val (mainModule, otherModules) = jsFiles.partition { it.nameWithoutExtension == project.name }
-
         val main = mainModule.firstOrNull()
             ?: throw IllegalStateException("Could not find js file corresponding to main module in ${minifiedCodeLocation.absolutePath}. Was looking for ${project.name}.js")
-
+        val modules = mutableMapOf<String, String>()
         modules["main"] = main.readText()
         modules.putAll(otherModules.associate { it.nameWithoutExtension to it.readText() })
+        val uploadContent = mapOf("branch" to branch, "modules" to modules)
+        val uploadContentJson = groovy.json.JsonOutput.toJson(uploadContent)
 
-        logger.lifecycle("uploading ${jsFiles.count()} files to branch '$branch' on server $host")
+        logger.lifecycle("Uploading ${jsFiles.count()} files to branch '$branch' on server $host")
+        logger.debug("Request Body: $uploadContentJson")
+
+        // upload using very old school HttpURLConnection as it is available in jdk < 9
+        val url = URL("$host/api/user/code")
+        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+        connection.doOutput = true
+        connection.requestMethod = "POST"
+        connection.setRequestProperty("Content-Type", "application/json")
+        if (screepsToken != null) {
+            connection.setRequestProperty("X-Token", screepsToken)
+        } else {
+            connection.setRequestProperty("Authorization", "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
+        }
+        connection.outputStream.use {
+            it.write(uploadContentJson.byteInputStream().readBytes())
+        }
+
+        val code = connection.responseCode
+        val message = connection.responseMessage
+        if (code in 200..299) {
+            val body = connection.inputStream.bufferedReader().readText()
+            logger.lifecycle("Upload done! $body")
+        } else {
+            val body = connection.errorStream.bufferedReader().readText()
+            val shortMessage = "Upload failed! $code $message"
+
+            logger.lifecycle(shortMessage)
+            logger.lifecycle(body)
+            logger.error(shortMessage)
+            logger.error(body)
+        }
+        connection.disconnect()
+
     }
 
 }
