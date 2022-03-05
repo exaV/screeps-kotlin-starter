@@ -5,20 +5,49 @@ import screeps.api.structures.StructureSpawn
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
 
-val SIMPLE_BODY: Array<BodyPartConstant> = arrayOf(WORK, MOVE, CARRY)
+val BODYPART_COST = hashMapOf(
+    MOVE to 50,
+    WORK to 100,
+    ATTACK to 80,
+    CARRY to 50,
+    HEAL to 250,
+    RANGED_ATTACK to 150,
+    TOUGH to 10,
+    CLAIM to 600
+)
+
+class Body(val parts: Array<BodyPartConstant>) {
+    val cost = parts.sumOf { part -> BODYPART_COST[part]!! }
+}
+
+val BASE_BODY = Body(arrayOf(WORK, MOVE, CARRY))
+
+val HARVESTER_BODIES = arrayOf(
+    BASE_BODY,
+)
+
+fun getBody(role: ScreepRole, energyAvailable: Int): Body {
+    when (role) {
+        ScreepRole.HARVESTER -> return HARVESTER_BODIES.last { it.cost <= energyAvailable }
+    }
+}
 
 fun spawnCreeps(
+    role: ScreepRole,
     spawn: StructureSpawn
 ) {
 
-    val body = SIMPLE_BODY
+    val body = try {
+        getBody(role, spawn.room.energyCapacityAvailable)
+    } catch (error: NoSuchElementException) {
+        BASE_BODY
+    }
 
     val newName = "creep_${Game.time}"
-    val code = spawn.spawnCreep(body, newName)
 
-    when (code) {
+    when (val code = spawn.spawnCreep(body.parts, newName)) {
         OK -> console.log("spawning $newName with body $body")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run {console.log("Not enough energy") }
+        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { console.log("Not enough energy") }
         else -> console.log("unhandled error code $code")
     }
 }
