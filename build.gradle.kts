@@ -63,6 +63,20 @@ tasks.register("deploy") {
             throw InvalidUserDataException("found no code to upload at ${minifiedCodeLocation.path}")
         }
 
+        /*
+        The screeps server expects us to upload our code in the following json format
+        https://docs.screeps.com/commit.html#Using-direct-API-access
+        {
+            "branch":"<branch-name>"
+            "modules": {
+                "main":<main script as a string, must contain the "loop" function>
+                "module1":<a module that is imported in the main script>
+            }
+        }
+        The following code extracts the generated js code from the build folder and writes it to a string that has the
+        correct format
+         */
+
         val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }.orEmpty()
         val (mainModule, otherModules) = jsFiles.partition { it.nameWithoutExtension == project.name }
         val main = mainModule.firstOrNull()
@@ -81,7 +95,7 @@ tasks.register("deploy") {
         val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
         connection.doOutput = true
         connection.requestMethod = "POST"
-        connection.setRequestProperty("Content-Type", "application/json")
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
         if (screepsToken != null) {
             connection.setRequestProperty("X-Token", screepsToken)
         } else {
