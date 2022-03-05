@@ -34,12 +34,14 @@ Credentials must be provided in a `gradle.properties` file in the root folder of
     screepsPassword=<your-password>
     screepsHost=https://screeps.com (optional)
     screepsBranch=default (optional)
+    screepsSkipSslVerify=false (optional)
 
 Alternatively, you can set up an [auth token](https://screeps.com/a/#!/account/auth-tokens) instead of a password (only for official servers)
 
     screepsToken=<your-token>
     screepsHost=https://screeps.com (optional)
     screepsBranch=default (optional)
+    screepsSkipSslVerify=false (optional)
 
 ### Types
 Standalone types are available here: https://github.com/exaV/screeps-kotlin-types
