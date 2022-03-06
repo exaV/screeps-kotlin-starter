@@ -24,14 +24,21 @@ class Body(val parts: Array<BodyPartConstant>) {
 val BASE_BODY = Body(arrayOf(WORK, MOVE, CARRY))
 
 val HARVESTER_BODIES = arrayOf(
-    BASE_BODY,
+    Body(arrayOf(WORK, WORK, MOVE)),
+)
+
+val UPGRADER_BODIES = arrayOf(
+    Body(arrayOf(WORK, MOVE, MOVE, CARRY, CARRY))
 )
 
 fun getBody(role: CreepRole, energyAvailable: Int): Body {
-    return when (role) {
-        CreepRole.HARVESTER -> HARVESTER_BODIES.last { it.cost <= energyAvailable }
-        CreepRole.UNASSIGNED -> BASE_BODY
+    val bodies = when (role) {
+        CreepRole.HARVESTER -> HARVESTER_BODIES
+        CreepRole.UPGRADER -> UPGRADER_BODIES
+        CreepRole.UNASSIGNED -> return BASE_BODY
     }
+
+    return bodies.last { it.cost <= energyAvailable }
 }
 
 fun spawnCreeps(

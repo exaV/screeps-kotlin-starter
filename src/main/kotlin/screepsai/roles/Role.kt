@@ -9,6 +9,7 @@ var CreepMemory.role: Int by memory { CreepRole.UNASSIGNED.ordinal }
 enum class CreepRole {
     UNASSIGNED,
     HARVESTER,
+    UPGRADER
 }
 
 enum class CreepState {
@@ -31,7 +32,8 @@ abstract class Role(val creep: Creep) {
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
                 CreepRole.HARVESTER -> Harvester(creep)
-                else -> Harvester(creep)
+                CreepRole.UPGRADER -> Upgrader(creep)
+                CreepRole.UNASSIGNED -> Harvester(creep)
             }
         }
     }
@@ -63,6 +65,25 @@ abstract class Role(val creep: Creep) {
 
     fun error(message: String, say: Boolean = false) {
         log("ERROR", message, say = say)
+    }
+
+    protected fun pickupEnergy() {
+        // TODO: Handle priority
+        val energySources = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
+
+        if (energySources.isEmpty()) {
+            warning("No energy available!", say = true)
+            return
+        }
+
+        val energySource = energySources.first()
+        val status = creep.pickup(energySource)
+
+        if (status == ERR_NOT_IN_RANGE) {
+            creep.moveTo(energySource.pos.x, energySource.pos.y)
+        } else if (status != OK) {
+            error("Gather failed with code $status")
+        }
     }
 
     abstract fun run()
