@@ -26,14 +26,15 @@ val HARVESTER_BODIES = arrayOf(
     BASE_BODY,
 )
 
-fun getBody(role: ScreepRole, energyAvailable: Int): Body {
-    when (role) {
-        ScreepRole.HARVESTER -> return HARVESTER_BODIES.last { it.cost <= energyAvailable }
+fun getBody(role: CreepRole, energyAvailable: Int): Body {
+    return when (role) {
+        CreepRole.HARVESTER -> HARVESTER_BODIES.last { it.cost <= energyAvailable }
+        CreepRole.UNASSIGNED -> BASE_BODY
     }
 }
 
 fun spawnCreeps(
-    role: ScreepRole,
+    role: CreepRole,
     spawn: StructureSpawn
 ) {
 
@@ -43,13 +44,21 @@ fun spawnCreeps(
         BASE_BODY
     }
 
-    val newName = "creep_${Game.time}"
+    val newName = "creep_${role.name}_${Game.time}"
 
-    when (val code = spawn.spawnCreep(body.parts, newName)) {
+    val code = spawn.spawnCreep(body.parts, newName)
+    when (code) {
         OK -> console.log("spawning $newName with body $body")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { console.log("Not enough energy") }
+        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy")
         else -> console.log("unhandled error code $code")
     }
+
+    if (code != OK) {
+        return
+    }
+
+    val creep = Game.creeps[newName]!!
+    creep.setRole(role)
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {

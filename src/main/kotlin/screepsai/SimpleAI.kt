@@ -11,10 +11,13 @@ fun gameLoop() {
     houseKeeping(Game.creeps)
 
     //make sure we have at least some creeps
-    spawnCreeps(ScreepRole.HARVESTER, mainSpawn)
+    spawnCreeps(CreepRole.HARVESTER, mainSpawn)
 
     for ((_, creep) in Game.creeps) {
-        val role = Harvester(creep)
+        val role = when (creep.getRole()){
+            CreepRole.HARVESTER-> Harvester(creep)
+            else -> Harvester(creep)
+        }
 
         role.run()
     }
