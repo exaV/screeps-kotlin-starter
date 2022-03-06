@@ -1,7 +1,6 @@
-package screepsai
+package screepsai.roles
 
-import screeps.api.Creep
-import screeps.api.CreepMemory
+import screeps.api.*
 import screeps.utils.memory.memory
 
 var CreepMemory.state: Int by memory { CreepState.GET_ENERGY.ordinal }
@@ -66,6 +65,6 @@ fun Creep.setRole(newRole: CreepRole) {
 
 fun Creep.getRole(): CreepRole {
     // TODO: Set up a map so this is faster/better
-    return CreepRole.values().firstOrNull {it.ordinal == memory.role} ?: CreepRole.UNASSIGNED
+    return CreepRole.values().firstOrNull { it.ordinal == memory.role } ?: CreepRole.UNASSIGNED
 }
 

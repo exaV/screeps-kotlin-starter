@@ -4,6 +4,8 @@ package screepsai
 import screeps.api.*
 import screeps.api.structures.StructureSpawn
 
+import screepsai.roles.*
+
 fun gameLoop() {
     val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
 

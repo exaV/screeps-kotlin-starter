@@ -1,4 +1,4 @@
-package screepsai
+package screepsai.roles
 
 import screeps.api.*
 

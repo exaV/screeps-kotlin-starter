@@ -4,6 +4,7 @@ import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
+import screepsai.roles.*
 
 val BODYPART_COST = hashMapOf(
     MOVE to 50,
