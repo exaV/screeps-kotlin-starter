@@ -4,6 +4,7 @@ import screeps.api.*
 import screeps.api.structures.StructureSpawn
 import screeps.utils.isEmpty
 import screeps.utils.unsafe.delete
+import screepsai.roles.*
 
 val BODYPART_COST = hashMapOf(
     MOVE to 50,
@@ -23,17 +24,30 @@ class Body(val parts: Array<BodyPartConstant>) {
 val BASE_BODY = Body(arrayOf(WORK, MOVE, CARRY))
 
 val HARVESTER_BODIES = arrayOf(
-    BASE_BODY,
+    Body(arrayOf(WORK, WORK, MOVE)),
 )
 
-fun getBody(role: ScreepRole, energyAvailable: Int): Body {
-    when (role) {
-        ScreepRole.HARVESTER -> return HARVESTER_BODIES.last { it.cost <= energyAvailable }
+val UPGRADER_BODIES = arrayOf(
+    Body(arrayOf(WORK, MOVE, MOVE, CARRY, CARRY))
+)
+
+val TRANSPORTER_BODIES = arrayOf(
+    Body(arrayOf(MOVE, MOVE, MOVE, CARRY, CARRY, CARRY))
+)
+
+fun getBody(role: CreepRole, energyAvailable: Int): Body {
+    val bodies = when (role) {
+        CreepRole.UNASSIGNED -> return BASE_BODY
+        CreepRole.HARVESTER -> HARVESTER_BODIES
+        CreepRole.UPGRADER -> UPGRADER_BODIES
+        CreepRole.TRANSPORTER -> TRANSPORTER_BODIES
     }
+
+    return bodies.last { it.cost <= energyAvailable }
 }
 
 fun spawnCreeps(
-    role: ScreepRole,
+    role: CreepRole,
     spawn: StructureSpawn
 ) {
 
@@ -43,13 +57,20 @@ fun spawnCreeps(
         BASE_BODY
     }
 
-    val newName = "creep_${Game.time}"
-
-    when (val code = spawn.spawnCreep(body.parts, newName)) {
+    val newName = "creep_${role.name}_${Game.time}"
+    val code = spawn.spawnCreep(body.parts, newName)
+    when (code) {
         OK -> console.log("spawning $newName with body $body")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> run { console.log("Not enough energy") }
+        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
         else -> console.log("unhandled error code $code")
     }
+
+    if (code != OK) {
+        return
+    }
+
+    val creep = Game.creeps[newName]!!
+    creep.setRole(role)
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {

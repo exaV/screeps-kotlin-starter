@@ -1,43 +1,33 @@
-package screepsai
+package screepsai.roles
 
 import screeps.api.*
 
-class Harvester(creep: Creep) : Role(creep) {
+class Upgrader(creep: Creep) : Role(creep) {
     override fun run() {
-        console.log("${creep.name}: State = ${state.name}")
         when (state) {
             CreepState.GET_ENERGY -> {
                 getEnergy()
             }
             CreepState.DO_WORK -> {
-                storeEnergy()
+                upgradeController()
             }
         }
     }
 
     private fun getEnergy() {
-        val energySources = creep.room.find(FIND_SOURCES)
-        val energySource = energySources.first()
-
-        val status = creep.harvest(energySource)
-
-        if (status == ERR_NOT_IN_RANGE) {
-            creep.moveTo(energySource.pos.x, energySource.pos.y)
-        } else if (status != OK) {
-            console.log("${creep.name}: ERROR Gather failed $status")
-        }
+        pickupEnergy()
 
         if (creep.store.getFreeCapacity() == 0) {
-            console.log("${creep.name}: Energy full")
+            info("Energy full", say = true)
             state = CreepState.DO_WORK
         }
     }
 
-    private fun storeEnergy() {
+    private fun upgradeController() {
         val controller = creep.room.controller
 
         if (controller == null) {
-            console.log("${creep.name}: No controller")
+            error("No controller!")
             return
         }
 
@@ -46,10 +36,11 @@ class Harvester(creep: Creep) : Role(creep) {
         if (status == ERR_NOT_IN_RANGE) {
             creep.moveTo(controller)
         } else if (status == ERR_NOT_ENOUGH_ENERGY) {
+            info("Out of energy", say = true)
             state = CreepState.GET_ENERGY
             return
         } else if (status != OK) {
-            console.log("${creep.name}: ERROR Upgrade failed: $status")
+            error("Upgrade failed with code $status", say = true)
         }
 
         if (creep.store.getCapacity(RESOURCE_ENERGY) <= 0) {
