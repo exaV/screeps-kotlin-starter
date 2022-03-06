@@ -24,6 +24,18 @@ fun getState(state: Int): CreepState {
 
 
 abstract class Role(val creep: Creep) {
+    companion object {
+        /*
+            Instantiate concrete subclass based on given role and creep
+         */
+        fun build(creepRole: CreepRole, creep: Creep): Role {
+            return when (creepRole) {
+                CreepRole.HARVESTER -> Harvester(creep)
+                else -> Harvester(creep)
+            }
+        }
+    }
+
     var state: CreepState = getState(creep.memory.state)
         set(value) {
             field = value
