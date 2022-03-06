@@ -7,21 +7,18 @@ import screepsai.roles.*
 
 
 fun getCreepsByRole(): Map<CreepRole, List<Creep>> {
-    val creepsByRole = Game.creeps.values.groupBy { it.getRole() }.toMutableMap()
 
-    for (creepRole in CreepRole.values()) {
-        if (!creepsByRole.containsKey(creepRole)) {
-            creepsByRole[creepRole] = listOf()
-        }
-    }
+    val creepsByRole = CreepRole.values().associateWith { listOf<Creep>() }.toMutableMap()
 
+    Game.creeps.values.groupBy { it.getRole() }.forEach { creepsByRole[it.key] = it.value }
     return creepsByRole
 }
 
 // Desired number of creeps in each role
 val roleMemberCount = mapOf(
     CreepRole.HARVESTER to 3,
-    CreepRole.UPGRADER to 6
+    CreepRole.UPGRADER to 8,
+    CreepRole.TRANSPORTER to 1
 )
 
 

@@ -9,7 +9,8 @@ var CreepMemory.role: Int by memory { CreepRole.UNASSIGNED.ordinal }
 enum class CreepRole {
     UNASSIGNED,
     HARVESTER,
-    UPGRADER
+    TRANSPORTER,
+    UPGRADER,
 }
 
 enum class CreepState {
@@ -31,9 +32,10 @@ abstract class Role(val creep: Creep) {
          */
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
+                CreepRole.UNASSIGNED -> Harvester(creep)
                 CreepRole.HARVESTER -> Harvester(creep)
                 CreepRole.UPGRADER -> Upgrader(creep)
-                CreepRole.UNASSIGNED -> Harvester(creep)
+                CreepRole.TRANSPORTER -> Transporter(creep)
             }
         }
     }
