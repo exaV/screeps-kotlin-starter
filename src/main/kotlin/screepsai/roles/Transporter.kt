@@ -1,6 +1,13 @@
 package screepsai.roles
 
 import screeps.api.*
+import screeps.api.structures.*
+
+val FILLABLE_STRUCTURES = setOf(
+    STRUCTURE_SPAWN,
+    STRUCTURE_EXTENSION,
+    STRUCTURE_STORAGE
+)
 
 class Transporter(creep: Creep) : Role(creep) {
     override fun run() {
@@ -23,14 +30,32 @@ class Transporter(creep: Creep) : Role(creep) {
         }
     }
 
-    private fun storeEnergy() {
-        // TODO: Find other targets like extensions and storage
-        val spawn = creep.room.find(FIND_MY_SPAWNS).first()
+    private fun findFillableStructures(): List<StoreOwner> {
+        return creep.room.find(FIND_MY_STRUCTURES).filter {
+            it.structureType in FILLABLE_STRUCTURES
+        }.map { it as StoreOwner }.filter {
+            (it.store.getFreeCapacity(RESOURCE_ENERGY) ?: 0) > 0
+        }.sortedBy {
+            when (it.unsafeCast<Structure>().structureType) {
+                STRUCTURE_SPAWN -> 1
+                STRUCTURE_EXTENSION -> 2
+                STRUCTURE_STORAGE -> 3
+                else -> 4
+            }
+        }
+    }
 
-        val status = creep.transfer(spawn, RESOURCE_ENERGY)
+    private fun storeEnergy() {
+        val fillableStructure = findFillableStructures().firstOrNull()
+        if (fillableStructure == null) {
+            info("No structures to fill with energy")
+            return
+        }
+
+        val status = creep.transfer(fillableStructure, RESOURCE_ENERGY)
 
         if (status == ERR_NOT_IN_RANGE) {
-            creep.moveTo(spawn)
+            creep.moveTo(fillableStructure)
         } else if (status == ERR_NOT_ENOUGH_ENERGY) {
             info("Out of energy", say = true)
             state = CreepState.GET_ENERGY

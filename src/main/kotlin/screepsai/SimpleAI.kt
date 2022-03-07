@@ -17,9 +17,9 @@ fun getCreepsByRole(): Map<CreepRole, List<Creep>> {
 // Desired number of creeps in each role
 val roleMemberCount = mapOf(
     CreepRole.HARVESTER to 3,
-    CreepRole.UPGRADER to 2,
+    CreepRole.UPGRADER to 8,
     CreepRole.TRANSPORTER to 1,
-    CreepRole.BUILDER to 5
+    CreepRole.BUILDER to 1
 )
 
 
