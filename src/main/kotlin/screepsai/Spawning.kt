@@ -35,12 +35,17 @@ val TRANSPORTER_BODIES = arrayOf(
     Body(arrayOf(MOVE, MOVE, MOVE, CARRY, CARRY, CARRY))
 )
 
+val BUILDER_BODIES = arrayOf(
+    Body(arrayOf(WORK, WORK, CARRY, MOVE))
+)
+
 fun getBody(role: CreepRole, energyAvailable: Int): Body {
     val bodies = when (role) {
         CreepRole.UNASSIGNED -> return BASE_BODY
         CreepRole.HARVESTER -> HARVESTER_BODIES
         CreepRole.UPGRADER -> UPGRADER_BODIES
         CreepRole.TRANSPORTER -> TRANSPORTER_BODIES
+        CreepRole.BUILDER -> BUILDER_BODIES
     }
 
     return bodies.last { it.cost <= energyAvailable }

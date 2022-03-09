@@ -11,6 +11,7 @@ enum class CreepRole {
     HARVESTER,
     TRANSPORTER,
     UPGRADER,
+    BUILDER,
 }
 
 enum class CreepState {
@@ -36,6 +37,7 @@ abstract class Role(val creep: Creep) {
                 CreepRole.HARVESTER -> Harvester(creep)
                 CreepRole.UPGRADER -> Upgrader(creep)
                 CreepRole.TRANSPORTER -> Transporter(creep)
+                CreepRole.BUILDER -> Builder(creep)
             }
         }
     }
