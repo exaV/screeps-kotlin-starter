@@ -25,27 +25,31 @@ val BASE_BODY = Body(arrayOf(WORK, MOVE, CARRY))
 
 val HARVESTER_BODIES = arrayOf(
     Body(arrayOf(WORK, WORK, MOVE)),
+    Body(arrayOf(WORK, WORK, WORK, WORK, WORK, MOVE)),
 )
 
 val UPGRADER_BODIES = arrayOf(
-    Body(arrayOf(WORK, MOVE, MOVE, CARRY, CARRY))
+    Body(arrayOf(WORK, MOVE, MOVE, CARRY, CARRY)),
+    Body(arrayOf(MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY))
 )
 
 val TRANSPORTER_BODIES = arrayOf(
-    Body(arrayOf(MOVE, MOVE, MOVE, CARRY, CARRY, CARRY))
+    Body(arrayOf(MOVE, MOVE, CARRY, CARRY, CARRY, CARRY)),
+    Body(arrayOf(MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY))
 )
 
 val BUILDER_BODIES = arrayOf(
-    Body(arrayOf(WORK, WORK, CARRY, MOVE))
+    Body(arrayOf(WORK, WORK, CARRY, MOVE)),
+    Body(arrayOf(MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY))
 )
 
 fun getBody(role: CreepRole, energyAvailable: Int): Body {
     val bodies = when (role) {
-        CreepRole.UNASSIGNED -> return BASE_BODY
-        CreepRole.HARVESTER -> HARVESTER_BODIES
-        CreepRole.UPGRADER -> UPGRADER_BODIES
+        CreepRole.UNASSIGNED  -> return BASE_BODY
+        CreepRole.HARVESTER   -> HARVESTER_BODIES
+        CreepRole.UPGRADER    -> UPGRADER_BODIES
         CreepRole.TRANSPORTER -> TRANSPORTER_BODIES
-        CreepRole.BUILDER -> BUILDER_BODIES
+        CreepRole.BUILDER     -> BUILDER_BODIES
     }
 
     return bodies.last { it.cost <= energyAvailable }
@@ -58,16 +62,17 @@ fun spawnCreeps(
 
     val body = try {
         getBody(role, spawn.room.energyCapacityAvailable)
-    } catch (error: NoSuchElementException) {
+    }
+    catch (error: NoSuchElementException) {
         BASE_BODY
     }
 
     val newName = "creep_${role.name}_${Game.time}"
     val code = spawn.spawnCreep(body.parts, newName)
     when (code) {
-        OK -> console.log("spawning $newName with body $body")
+        OK                              -> console.log("spawning $newName with body $body")
         ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
-        else -> console.log("unhandled error code $code")
+        else                            -> console.log("unhandled error code $code")
     }
 
     if (code != OK) {
