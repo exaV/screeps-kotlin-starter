@@ -12,12 +12,18 @@ enum class CreepRole {
     TRANSPORTER,
     UPGRADER,
     BUILDER,
+    MAINTAINER
 }
 
 enum class CreepState {
     GET_ENERGY,
     DO_WORK;
 }
+
+val MAINTENANCE_REQUIRED_BUILDING_TYPES = setOf(
+    STRUCTURE_ROAD,
+    STRUCTURE_STORAGE
+)
 
 
 fun getState(state: Int): CreepState {
@@ -33,11 +39,12 @@ abstract class Role(val creep: Creep) {
          */
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
-                CreepRole.UNASSIGNED -> Harvester(creep)
-                CreepRole.HARVESTER -> Harvester(creep)
-                CreepRole.UPGRADER -> Upgrader(creep)
+                CreepRole.UNASSIGNED  -> Harvester(creep)
+                CreepRole.HARVESTER   -> Harvester(creep)
+                CreepRole.UPGRADER    -> Upgrader(creep)
                 CreepRole.TRANSPORTER -> Transporter(creep)
-                CreepRole.BUILDER -> Builder(creep)
+                CreepRole.BUILDER     -> Builder(creep)
+                CreepRole.MAINTAINER  -> Maintainer(creep)
             }
         }
     }
@@ -85,7 +92,8 @@ abstract class Role(val creep: Creep) {
 
         if (status == ERR_NOT_IN_RANGE) {
             creep.moveTo(energySource.pos.x, energySource.pos.y)
-        } else if (status != OK) {
+        }
+        else if (status != OK) {
             error("Gather failed with code $status")
         }
     }

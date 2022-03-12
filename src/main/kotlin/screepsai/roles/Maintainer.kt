@@ -2,7 +2,7 @@ package screepsai.roles
 
 import screeps.api.*
 
-class Builder(creep: Creep) : Role(creep) {
+class Maintainer(creep: Creep) : Role(creep) {
     override fun run() {
         when (state) {
             CreepState.GET_ENERGY -> {
@@ -13,7 +13,7 @@ class Builder(creep: Creep) : Role(creep) {
                 }
             }
             CreepState.DO_WORK    -> {
-                buildBuildings()
+                repairBuildings()
             }
         }
     }
@@ -32,35 +32,6 @@ class Builder(creep: Creep) : Role(creep) {
         }
         else if (code != OK) {
             error("Couldn't withdraw from storage due to error: $code")
-        }
-    }
-
-    private fun buildBuildings() {
-        val constructionSite = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES)
-
-        if (constructionSite == null) {
-            debug("No available construction sites!")
-            // Fall back to repairing buildings if there are none that need to be built
-            repairBuildings()
-            return
-        }
-
-        val status = creep.build(constructionSite)
-
-        if (status == ERR_NOT_IN_RANGE) {
-            creep.moveTo(constructionSite)
-        }
-        else if (status == ERR_NOT_ENOUGH_ENERGY) {
-            info("Out of energy", say = true)
-            state = CreepState.GET_ENERGY
-            return
-        }
-        else if (status != OK) {
-            error("Build failed with code $status", say = true)
-        }
-
-        if (creep.store.getCapacity(RESOURCE_ENERGY) <= 0) {
-            state = CreepState.GET_ENERGY
         }
     }
 
