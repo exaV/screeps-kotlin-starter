@@ -2,6 +2,7 @@ package screepsai.roles
 
 import screeps.api.*
 import screeps.utils.memory.memory
+import kotlin.math.abs
 
 var CreepMemory.state: Int by memory { CreepState.GET_ENERGY.ordinal }
 var CreepMemory.role: Int by memory { CreepRole.UNASSIGNED.ordinal }
@@ -80,14 +81,14 @@ abstract class Role(val creep: Creep) {
 
     protected fun pickupEnergy() {
         // TODO: Handle priority
-        val energySources = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
+        val energySource = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
+            .minByOrNull { abs(creep.pos.x - it.pos.x) + abs(creep.pos.y - it.pos.y) / it.amount }
 
-        if (energySources.isEmpty()) {
+        if (energySource == null) {
             warning("No energy available!", say = true)
             return
         }
 
-        val energySource = energySources.first()
         val status = creep.pickup(energySource)
 
         if (status == ERR_NOT_IN_RANGE) {
