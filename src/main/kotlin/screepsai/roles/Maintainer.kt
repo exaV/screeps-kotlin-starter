@@ -36,13 +36,22 @@ class Maintainer(creep: Creep) : Role(creep) {
     }
 
     private fun repairBuildings() {
-        val building =
+        var building =
             creep.room.find(FIND_STRUCTURES).filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES }
                 .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
 
         if (building == null) {
             error("No available buildings to repair!")
             return
+        }
+
+        if (building.hits.toFloat() / building.hitsMax.toFloat() > 0.90) {
+            info("Buildings well maintained, repairing a wall instead")
+            val wall = creep.room.find(FIND_MY_STRUCTURES).filter { it.structureType == STRUCTURE_WALL }
+                .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
+            if (wall != null) {
+                building = wall
+            }
         }
 
         val status = creep.repair(building)

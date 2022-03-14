@@ -66,7 +66,8 @@ class Builder(creep: Creep) : Role(creep) {
 
     private fun repairBuildings() {
         val building =
-            creep.room.find(FIND_STRUCTURES).filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES }
+            creep.room.find(FIND_STRUCTURES)
+                .filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES || it.structureType == STRUCTURE_WALL }
                 .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
 
         if (building == null) {
