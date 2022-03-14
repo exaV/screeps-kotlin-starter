@@ -25,6 +25,7 @@ val roleMemberCount = mapOf(
 
 
 fun gameLoop() {
+    val startCpu = Game.cpu.tickLimit
     val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
 
     //delete memories of creeps that have passed away
@@ -45,4 +46,6 @@ fun gameLoop() {
             Role.build(creepRole, creep).run()
         }
     }
+
+    console.log("Used ${startCpu - Game.cpu.tickLimit} CPU on tick ${Game.time}")
 }
