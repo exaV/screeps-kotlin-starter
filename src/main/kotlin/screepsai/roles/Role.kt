@@ -40,7 +40,7 @@ abstract class Role(val creep: Creep) {
          */
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
-                CreepRole.UNASSIGNED  -> Harvester(creep)
+                CreepRole.UNASSIGNED  -> throw IllegalArgumentException("Cannot process a creep without a role")
                 CreepRole.HARVESTER   -> Harvester(creep)
                 CreepRole.UPGRADER    -> Upgrader(creep)
                 CreepRole.TRANSPORTER -> Transporter(creep)
