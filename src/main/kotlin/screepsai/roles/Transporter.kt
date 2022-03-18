@@ -15,14 +15,26 @@ class Transporter(creep: Creep) : Role(creep) {
             CreepState.GET_ENERGY -> {
                 getEnergy()
             }
-            CreepState.DO_WORK -> {
+            CreepState.DO_WORK    -> {
                 storeEnergy()
             }
         }
     }
 
     private fun getEnergy() {
-        pickupEnergy()
+        val status = pickupEnergy()
+
+        if (status == ERR_NOT_FOUND) {
+            val storage = creep.room.storage ?: return
+            warning("No energy to pick up, gathering from storage")
+            val code = creep.withdraw(storage, RESOURCE_ENERGY)
+            if (code == ERR_NOT_IN_RANGE) {
+                creep.moveTo(storage.pos.x, storage.pos.y)
+            }
+            else if (status != OK) {
+                error("Storage withdraw failed with code $status")
+            }
+        }
 
         if (creep.store.getFreeCapacity() == 0) {
             info("Energy full", say = true)
@@ -37,10 +49,10 @@ class Transporter(creep: Creep) : Role(creep) {
             (it.store.getFreeCapacity(RESOURCE_ENERGY) ?: 0) > 0
         }.sortedBy {
             when (it.unsafeCast<Structure>().structureType) {
-                STRUCTURE_SPAWN -> 1
+                STRUCTURE_SPAWN     -> 1
                 STRUCTURE_EXTENSION -> 2
-                STRUCTURE_STORAGE -> 3
-                else -> 4
+                STRUCTURE_STORAGE   -> 3
+                else                -> 4
             }
         }
     }
@@ -56,11 +68,13 @@ class Transporter(creep: Creep) : Role(creep) {
 
         if (status == ERR_NOT_IN_RANGE) {
             creep.moveTo(fillableStructure)
-        } else if (status == ERR_NOT_ENOUGH_ENERGY) {
+        }
+        else if (status == ERR_NOT_ENOUGH_ENERGY) {
             info("Out of energy", say = true)
             state = CreepState.GET_ENERGY
             return
-        } else if (status != OK) {
+        }
+        else if (status != OK) {
             error("Transfer failed with code $status", say = true)
         }
 

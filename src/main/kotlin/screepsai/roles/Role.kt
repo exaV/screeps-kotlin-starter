@@ -79,14 +79,14 @@ abstract class Role(val creep: Creep) {
         log("ERROR", message, say = say)
     }
 
-    protected fun pickupEnergy() {
+    protected fun pickupEnergy(): ScreepsReturnCode {
         // TODO: Handle priority
         val energySource = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
-            .minByOrNull { abs(creep.pos.x - it.pos.x) + abs(creep.pos.y - it.pos.y) / it.amount }
+            .minByOrNull { (abs(creep.pos.x - it.pos.x) + abs(creep.pos.y - it.pos.y)) / it.amount }
 
-        if (energySource == null) {
+        if (energySource == null || energySource.amount < 10) {
             warning("No energy available!", say = true)
-            return
+            return ERR_NOT_FOUND
         }
 
         val status = creep.pickup(energySource)
@@ -97,6 +97,7 @@ abstract class Role(val creep: Creep) {
         else if (status != OK) {
             error("Gather failed with code $status")
         }
+        return status
     }
 
     abstract fun run()
