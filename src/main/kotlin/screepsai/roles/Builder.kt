@@ -68,7 +68,13 @@ class Builder(creep: Creep) : Role(creep) {
         val building =
             creep.room.find(FIND_STRUCTURES)
                 .filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES || it.structureType == STRUCTURE_WALL }
-                .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
+                .minByOrNull {
+                    val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
+
+                    // Chunk float into multiple levels so the creep is less sensitive to repair progress
+                    // this makes the creeps focus on repairing a single target until it moves into the next "bucket"
+                    (ratio * 1000).toInt()
+                }
 
         if (building == null) {
             error("No available buildings to repair!")

@@ -38,7 +38,13 @@ class Maintainer(creep: Creep) : Role(creep) {
     private fun repairBuildings() {
         var building =
             creep.room.find(FIND_STRUCTURES).filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES }
-                .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
+                .minByOrNull {
+                    val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
+
+                    // Chunk float into multiple levels so the creep is less sensitive to repair progress
+                    // this makes the creeps focus on repairing a single target until it moves into the next "bucket"
+                    (ratio * 1000).toInt()
+                }
 
         if (building == null) {
             error("No available buildings to repair!")
@@ -48,7 +54,12 @@ class Maintainer(creep: Creep) : Role(creep) {
         if (building.hits.toFloat() / building.hitsMax.toFloat() > 0.90) {
             info("Buildings well maintained, repairing a wall instead")
             val wall = creep.room.find(FIND_MY_STRUCTURES).filter { it.structureType == STRUCTURE_WALL }
-                .minByOrNull { it.hits.toFloat() / it.hitsMax.toFloat() }
+                .minByOrNull {
+                    val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
+                    // Chunk float into multiple levels so the creep is less sensitive to repair progress
+                    // this makes the creeps focus on repairing a single target until it moves into the next "bucket"
+                    (ratio * 1000).toInt()
+                }
             if (wall != null) {
                 building = wall
             }

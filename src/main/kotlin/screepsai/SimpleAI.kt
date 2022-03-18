@@ -19,8 +19,8 @@ val roleMemberCount = mapOf(
     CreepRole.HARVESTER to 2,
     CreepRole.TRANSPORTER to 2,
     CreepRole.MAINTAINER to 2,
-    CreepRole.UPGRADER to 8,
-    CreepRole.BUILDER to 2
+    CreepRole.UPGRADER to 6,
+    CreepRole.BUILDER to 1
 )
 
 
