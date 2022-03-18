@@ -62,16 +62,17 @@ fun spawnCreeps(
 ) {
 
     val body = try {
-        getBody(role, spawn.room.energyCapacityAvailable)
+        getBody(role, spawn.room.energyAvailable)
     }
     catch (error: NoSuchElementException) {
-        BASE_BODY
+        console.log("Couldn't determine body for ${role} with ${spawn.room.energyAvailable} energy")
+        return
     }
 
     val newName = "creep_${role.name}_${Game.time}"
     val code = spawn.spawnCreep(body.parts, newName)
     when (code) {
-        OK                              -> console.log("spawning $newName with body $body")
+        OK                              -> console.log("spawning $newName with body ${body.parts}")
         ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
         else                            -> console.log("unhandled error code $code")
     }
