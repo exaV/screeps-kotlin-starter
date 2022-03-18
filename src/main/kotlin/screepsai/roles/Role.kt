@@ -2,6 +2,7 @@ package screepsai.roles
 
 import screeps.api.*
 import screeps.utils.memory.memory
+import kotlin.math.abs
 
 var CreepMemory.state: Int by memory { CreepState.GET_ENERGY.ordinal }
 var CreepMemory.role: Int by memory { CreepRole.UNASSIGNED.ordinal }
@@ -12,12 +13,18 @@ enum class CreepRole {
     TRANSPORTER,
     UPGRADER,
     BUILDER,
+    MAINTAINER
 }
 
 enum class CreepState {
     GET_ENERGY,
     DO_WORK;
 }
+
+val MAINTENANCE_REQUIRED_BUILDING_TYPES = setOf(
+    STRUCTURE_ROAD,
+    STRUCTURE_STORAGE
+)
 
 
 fun getState(state: Int): CreepState {
@@ -33,11 +40,12 @@ abstract class Role(val creep: Creep) {
          */
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
-                CreepRole.UNASSIGNED -> Harvester(creep)
-                CreepRole.HARVESTER -> Harvester(creep)
-                CreepRole.UPGRADER -> Upgrader(creep)
+                CreepRole.UNASSIGNED  -> throw IllegalArgumentException("Cannot process a creep without a role")
+                CreepRole.HARVESTER   -> Harvester(creep)
+                CreepRole.UPGRADER    -> Upgrader(creep)
                 CreepRole.TRANSPORTER -> Transporter(creep)
-                CreepRole.BUILDER -> Builder(creep)
+                CreepRole.BUILDER     -> Builder(creep)
+                CreepRole.MAINTAINER  -> Maintainer(creep)
             }
         }
     }
@@ -71,23 +79,25 @@ abstract class Role(val creep: Creep) {
         log("ERROR", message, say = say)
     }
 
-    protected fun pickupEnergy() {
+    protected fun pickupEnergy(): ScreepsReturnCode {
         // TODO: Handle priority
-        val energySources = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
+        val energySource = creep.room.find(FIND_DROPPED_RESOURCES).filter { it.resourceType == RESOURCE_ENERGY }
+            .minByOrNull { (abs(creep.pos.x - it.pos.x) + abs(creep.pos.y - it.pos.y)) / it.amount }
 
-        if (energySources.isEmpty()) {
+        if (energySource == null || energySource.amount < 10) {
             warning("No energy available!", say = true)
-            return
+            return ERR_NOT_FOUND
         }
 
-        val energySource = energySources.first()
         val status = creep.pickup(energySource)
 
         if (status == ERR_NOT_IN_RANGE) {
             creep.moveTo(energySource.pos.x, energySource.pos.y)
-        } else if (status != OK) {
+        }
+        else if (status != OK) {
             error("Gather failed with code $status")
         }
+        return status
     }
 
     abstract fun run()
