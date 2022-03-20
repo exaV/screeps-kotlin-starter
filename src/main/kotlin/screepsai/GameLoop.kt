@@ -2,12 +2,17 @@ package screepsai
 
 
 import screeps.api.*
-import screeps.api.structures.StructureSpawn
 import screepsai.roles.*
 
 
-fun getCreepsByRole(): Map<CreepRole, List<Creep>> {
-    return Game.creeps.values.groupBy { it.getRole() }
+fun getCreepsByRole(): Map<Room, Map<CreepRole, List<Creep>>> {
+
+    val creepsByRoomAndRole = HashMap<Room, Map<CreepRole, List<Creep>>>()
+    Game.creeps.values.groupBy { it.room }.forEach {
+        creepsByRoomAndRole[it.key] = it.value.groupBy { creep -> creep.getRole() }
+    }
+
+    return creepsByRoomAndRole
 }
 
 // Desired number of creeps in each role
@@ -19,15 +24,7 @@ val roleMemberCount = mapOf(
     CreepRole.BUILDER to 1
 )
 
-
-fun gameLoop() {
-    val startCpu = Game.cpu.tickLimit
-    val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
-
-    //delete memories of creeps that have passed away
-    houseKeeping(Game.creeps)
-
-    val creepsByRole = getCreepsByRole()
+fun runRoom(room: Room, creepsByRole: Map<CreepRole, List<Creep>>) {
     for (roleCount in roleMemberCount) {
         val creepRole = roleCount.key
         val creepCount = creepsByRole[roleCount.key]?.size ?: 0
@@ -54,12 +51,12 @@ fun gameLoop() {
                 }
             }
             if (spawn) {
-                spawnCreeps(creepRole, mainSpawn)
+                spawnCreeps(creepRole, room)
             }
         }
 
         // Set up role object and run role for each creep
-        val creeps = creepsByRole[roleCount.key] ?: listOf()
+        val creeps = creepsByRole[roleCount.key] ?: continue
         for (creep in creeps) {
             try {
                 Role.build(creepRole, creep).run()
@@ -73,6 +70,24 @@ fun gameLoop() {
                 }
             }
         }
+    }
+}
+
+
+fun gameLoop() {
+    val startCpu = Game.cpu.tickLimit
+    //delete memories of creeps that have passed away
+    houseKeeping(Game.creeps)
+
+    val creepsByRoomAndRole = getCreepsByRole()
+
+    for (roomToRole in creepsByRoomAndRole) {
+        val roomStartCpu = Game.cpu.tickLimit
+        val room = roomToRole.key
+        val creepsByRole = roomToRole.value
+
+        runRoom(room, creepsByRole)
+        console.log("${room} used ${roomStartCpu - Game.cpu.tickLimit} CPU on tick ${Game.time}")
     }
 
     console.log("Used ${startCpu - Game.cpu.tickLimit} CPU on tick ${Game.time}")

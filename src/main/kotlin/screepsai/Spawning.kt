@@ -56,33 +56,48 @@ fun getBody(role: CreepRole, energyAvailable: Int): Body {
     return bodies.last { it.cost <= energyAvailable }
 }
 
-fun spawnCreeps(
-    role: CreepRole,
-    spawn: StructureSpawn
-) {
-
-    val body = try {
-        getBody(role, spawn.room.energyAvailable)
-    }
-    catch (error: NoSuchElementException) {
-        console.log("Couldn't determine body for ${role} with ${spawn.room.energyAvailable} energy")
-        return
-    }
-
+fun spawnCreep(spawn: StructureSpawn, role: CreepRole, body: Body): ScreepsReturnCode {
     val newName = "creep_${role.name}_${Game.time}"
     val code = spawn.spawnCreep(body.parts, newName)
     when (code) {
-        OK                              -> console.log("spawning $newName with body ${body.parts}")
-        ERR_BUSY, ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
-        else                            -> console.log("unhandled error code $code")
+        OK                    -> console.log("spawning $newName with body ${body.parts}")
+        ERR_BUSY              -> console.log("Spawner ${spawn} in ${spawn.room} is busy")
+        ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
+        else                  -> console.log("unhandled error code $code")
     }
 
     if (code != OK) {
-        return
+        return code
     }
 
     val creep = Game.creeps[newName]!!
     creep.setRole(role)
+
+    return code
+}
+
+fun spawnCreeps(
+    role: CreepRole,
+    room: Room
+) {
+
+    val body = try {
+        getBody(role, room.energyAvailable)
+    }
+    catch (error: NoSuchElementException) {
+        console.log("Couldn't determine body for ${role} with ${room.energyAvailable} energy")
+        return
+    }
+
+    val spawns = room.find(FIND_MY_SPAWNS)
+
+    for (spawn in spawns) {
+        val code = spawnCreep(spawn, role, body)
+        if (code == OK) {
+            return
+        }
+    }
+    console.log("Unable to spawn new ${role} creep in ${room}")
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {
