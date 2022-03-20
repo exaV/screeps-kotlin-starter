@@ -2,10 +2,12 @@ package screepsai.roles
 
 import screeps.api.*
 import screeps.api.structures.*
+import kotlin.math.abs
 
 val FILLABLE_STRUCTURES = setOf(
     STRUCTURE_SPAWN,
     STRUCTURE_EXTENSION,
+    STRUCTURE_TOWER,
     STRUCTURE_STORAGE
 )
 
@@ -43,24 +45,42 @@ class Transporter(creep: Creep) : Role(creep) {
     }
 
     private fun findFillableStructures(): List<StoreOwner> {
-        return creep.room.find(FIND_MY_STRUCTURES).filter {
+        val fillableStructures = creep.room.find(FIND_MY_STRUCTURES).filter {
             it.structureType in FILLABLE_STRUCTURES
         }.map { it as StoreOwner }.filter {
             (it.store.getFreeCapacity(RESOURCE_ENERGY) ?: 0) > 0
-        }.sortedBy {
+        }.groupBy {
             when (it.unsafeCast<Structure>().structureType) {
+                // TODO: Determine priority level more intelligently
                 STRUCTURE_SPAWN     -> 1
                 STRUCTURE_EXTENSION -> 2
-                STRUCTURE_STORAGE   -> 3
-                else                -> 4
+                STRUCTURE_TOWER     -> 3
+                STRUCTURE_STORAGE   -> 4
+                else                -> 5
             }
         }
+
+        return fillableStructures.getOrElse(fillableStructures.keys.minOrNull() ?: 2) { emptyList() }
     }
 
     private fun storeEnergy() {
-        val fillableStructure = findFillableStructures().firstOrNull()
-        if (fillableStructure == null) {
+        val fillableStructures = findFillableStructures()
+
+        if (fillableStructures.isEmpty()) {
             info("No structures to fill with energy")
+            return
+        }
+
+        val structureType = (fillableStructures[0] as Structure).structureType
+        val fillableStructure = if (structureType == STRUCTURE_TOWER) {
+            fillableStructures.maxByOrNull { it.store.getFreeCapacity(RESOURCE_ENERGY) ?: 0 }
+        }
+        else {
+            fillableStructures.minByOrNull { abs(it.pos.x - creep.pos.x) + abs(it.pos.y - creep.pos.y) }
+        }
+
+        if (fillableStructure == null) {
+            error("No structures to fill with energy!")
             return
         }
 
