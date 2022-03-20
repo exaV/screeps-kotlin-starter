@@ -52,7 +52,8 @@ class Maintainer(creep: Creep) : Role(creep) {
         }
 
         if (building.hits.toFloat() / building.hitsMax.toFloat() > 0.90) {
-            val wall = creep.room.find(FIND_STRUCTURES).filter { it.structureType == STRUCTURE_WALL }
+            val wall = creep.room.find(FIND_STRUCTURES)
+                .filter { it.structureType == STRUCTURE_WALL || it.structureType == STRUCTURE_RAMPART }
                 .minByOrNull {
                     val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
                     // Chunk float into multiple levels so the creep is less sensitive to repair progress
@@ -60,7 +61,7 @@ class Maintainer(creep: Creep) : Role(creep) {
                     (ratio * 1000).toInt()
                 }
             if (wall != null) {
-                info("Buildings well maintained, repairing a wall instead")
+                info("Buildings well maintained, repairing ${wall} instead")
                 building = wall
             }
         }

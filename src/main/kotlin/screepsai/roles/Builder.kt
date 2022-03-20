@@ -67,7 +67,7 @@ class Builder(creep: Creep) : Role(creep) {
     private fun repairBuildings() {
         val building =
             creep.room.find(FIND_STRUCTURES)
-                .filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES || it.structureType == STRUCTURE_WALL }
+                .filter { it.structureType in MAINTENANCE_REQUIRED_BUILDING_TYPES || it.structureType == STRUCTURE_WALL || it.structureType == STRUCTURE_RAMPART }
                 .minByOrNull {
                     val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
 

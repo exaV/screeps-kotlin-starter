@@ -78,7 +78,7 @@ class Transporter(creep: Creep) : Role(creep) {
             error("Transfer failed with code $status", say = true)
         }
 
-        if (creep.store.getCapacity(RESOURCE_ENERGY) <= 0) {
+        if (creep.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
             state = CreepState.GET_ENERGY
         }
     }
