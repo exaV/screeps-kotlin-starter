@@ -2,6 +2,7 @@ package screepsai
 
 
 import screeps.api.*
+import screeps.api.structures.StructureTower
 import screepsai.roles.*
 
 
@@ -25,6 +26,9 @@ val roleMemberCount = mapOf(
 )
 
 fun runRoom(room: Room, creepsByRole: Map<CreepRole, List<Creep>>) {
+    room.find(FIND_MY_STRUCTURES).filter { it.structureType == STRUCTURE_TOWER }.map { it as StructureTower }
+        .forEach { runTower(it) }
+
     for (roleCount in roleMemberCount) {
         val creepRole = roleCount.key
         val creepCount = creepsByRole[roleCount.key]?.size ?: 0
