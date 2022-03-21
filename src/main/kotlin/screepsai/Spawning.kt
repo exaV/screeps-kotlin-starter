@@ -56,7 +56,7 @@ fun getBody(role: CreepRole, energyAvailable: Int): Body {
     return bodies.last { it.cost <= energyAvailable }
 }
 
-fun spawnCreep(spawn: StructureSpawn, role: CreepRole, body: Body): ScreepsReturnCode {
+fun spawnCreep(spawn: StructureSpawn, role: CreepRole, body: Body): Creep? {
     val newName = "creep_${role.name}_${Game.time}"
     val code = spawn.spawnCreep(body.parts, newName)
     when (code) {
@@ -67,37 +67,38 @@ fun spawnCreep(spawn: StructureSpawn, role: CreepRole, body: Body): ScreepsRetur
     }
 
     if (code != OK) {
-        return code
+        return null
     }
 
     val creep = Game.creeps[newName]!!
     creep.setRole(role)
 
-    return code
+    return creep
 }
 
-fun spawnCreeps(
+fun spawnNewCreep(
     role: CreepRole,
     room: Room
-) {
+): Creep? {
 
     val body = try {
         getBody(role, room.energyAvailable)
     }
     catch (error: NoSuchElementException) {
-        console.log("Couldn't determine body for ${role} with ${room.energyAvailable} energy")
-        return
+        console.log("Couldn't determine body for ${role} in ${room} with ${room.energyAvailable} energy")
+        return null
     }
 
     val spawns = room.find(FIND_MY_SPAWNS)
 
     for (spawn in spawns) {
-        val code = spawnCreep(spawn, role, body)
-        if (code == OK) {
-            return
+        val creep = spawnCreep(spawn, role, body)
+        if (creep != null) {
+            return creep
         }
     }
     console.log("Unable to spawn new ${role} creep in ${room}")
+    return null
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {
