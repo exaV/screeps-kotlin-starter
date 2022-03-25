@@ -13,7 +13,8 @@ enum class CreepRole {
     TRANSPORTER,
     UPGRADER,
     BUILDER,
-    MAINTAINER
+    MAINTAINER,
+    CLAIMER
 }
 
 enum class CreepState {
@@ -46,6 +47,7 @@ abstract class Role(val creep: Creep) {
                 CreepRole.TRANSPORTER -> Transporter(creep)
                 CreepRole.BUILDER     -> Builder(creep)
                 CreepRole.MAINTAINER  -> Maintainer(creep)
+                CreepRole.CLAIMER     -> Claimer(creep)
             }
         }
     }

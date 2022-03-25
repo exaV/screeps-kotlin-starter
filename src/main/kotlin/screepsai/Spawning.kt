@@ -42,6 +42,9 @@ val BUILDER_BODIES = arrayOf(
     Body(arrayOf(WORK, CARRY, CARRY, CARRY, MOVE)),
     Body(arrayOf(MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY))
 )
+val CLAIMER_BODIES = arrayOf(
+    Body(arrayOf(MOVE, CLAIM)),
+)
 
 fun getBody(role: CreepRole, energyAvailable: Int): Body {
     val bodies = when (role) {
@@ -51,6 +54,7 @@ fun getBody(role: CreepRole, energyAvailable: Int): Body {
         CreepRole.TRANSPORTER -> TRANSPORTER_BODIES
         CreepRole.BUILDER     -> BUILDER_BODIES
         CreepRole.MAINTAINER  -> BUILDER_BODIES
+        CreepRole.CLAIMER     -> CLAIMER_BODIES
     }
 
     return bodies.last { it.cost <= energyAvailable }
@@ -99,6 +103,21 @@ fun spawnNewCreep(
     }
     console.log("Unable to spawn new ${role} creep in ${room}")
     return null
+}
+
+
+fun spawnClaimer(targetFlag: Flag): Creep? {
+    val body = CLAIMER_BODIES[0]
+    val spawner = Game.spawns.values.filter { it.room.energyAvailable > body.cost }.minByOrNull {
+        it.pos.getRangeTo(targetFlag)
+    }
+
+    if (spawner == null) {
+        console.log("Cannot claim a room if no spawners are available!")
+        return null
+    }
+
+    return spawnCreep(spawner, CreepRole.CLAIMER, CLAIMER_BODIES[0])
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {

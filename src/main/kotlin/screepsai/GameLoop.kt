@@ -5,7 +5,6 @@ import screeps.api.*
 import screeps.api.structures.StructureTower
 import screepsai.roles.*
 
-
 fun getCreepsByRole(): Map<CreepRole, Map<Room, List<Creep>>> {
 
     val creepsByRoleAndRoom = HashMap<CreepRole, Map<Room, List<Creep>>>()
@@ -21,7 +20,7 @@ val roleMemberCount = mapOf(
     CreepRole.HARVESTER to 2,
     CreepRole.TRANSPORTER to 2,
     CreepRole.MAINTAINER to 2,
-    CreepRole.UPGRADER to 6,
+    CreepRole.UPGRADER to 8,
     CreepRole.BUILDER to 1
 )
 
@@ -49,7 +48,6 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
     else {
         console.log("All roles filled in ${room}")
     }
-
 
     for (record in creepsByRole) {
         val creepRole = record.key
@@ -83,9 +81,19 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
     }
 }
 
+fun claimNewRooms(creepsByRoomAndRole: Map<CreepRole, Map<Room, List<Creep>>>) {
+    val nextRoomFlag = Game.flags["NextRoom"] ?: return console.log("No NextRoom flag, skipping claim room routine")
+    val claimer =
+        creepsByRoomAndRole[CreepRole.CLAIMER]?.flatMap { it.value }?.firstOrNull() ?: spawnClaimer(nextRoomFlag)
+        ?: return console.log("No claimer creep could be located or created")
+
+    Role.build(CreepRole.CLAIMER, claimer).run()
+}
+
 
 fun gameLoop() {
     val startCpu = Game.cpu.tickLimit
+    console.log("${startCpu} CPU available on tick ${Game.time}")
     //delete memories of creeps that have passed away
     houseKeeping(Game.creeps)
 
@@ -97,6 +105,8 @@ fun gameLoop() {
         runRoom(room, creepsByRoomAndRole)
         console.log("${room} used ${roomStartCpu - Game.cpu.tickLimit} CPU on tick ${Game.time}")
     }
+
+    claimNewRooms(creepsByRoomAndRole)
 
     console.log("Used ${startCpu - Game.cpu.tickLimit} CPU on tick ${Game.time}")
 }
