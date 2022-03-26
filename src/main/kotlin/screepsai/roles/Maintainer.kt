@@ -58,7 +58,7 @@ class Maintainer(creep: Creep) : Role(creep) {
                     val ratio = it.hits.toFloat() / it.hitsMax.toFloat()
                     // Chunk float into multiple levels so the creep is less sensitive to repair progress
                     // this makes the creeps focus on repairing a single target until it moves into the next "bucket"
-                    (ratio * 1000).toInt()
+                    (ratio * (it.hitsMax / creep.store.getCapacity(RESOURCE_ENERGY)!!)).toInt()
                 }
             if (wall != null) {
                 info("Buildings well maintained, repairing ${wall} instead")
