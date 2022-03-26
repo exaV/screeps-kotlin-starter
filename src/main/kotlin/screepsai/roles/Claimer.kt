@@ -2,7 +2,7 @@ package screepsai.roles
 
 import screeps.api.*
 import screeps.api.structures.StructureController
-import screeps.utils.unsafe.jsObject
+import screepsai.utils.*
 
 class Claimer(creep: Creep) : Role(creep) {
 
@@ -13,62 +13,13 @@ class Claimer(creep: Creep) : Role(creep) {
         claimRoom()
     }
 
-    private fun getRoomCostMatrix(roomName: String): CostMatrix {
-        val costMatrix = PathFinder.CostMatrix()
-        val room = Game.rooms[roomName]
-        if (room == null) {
-            debug("${roomName} not known, returning default cost matrix")
-            return costMatrix
-        }
-
-        for (structure in room.find(FIND_STRUCTURES)) {
-            if (structure.structureType == STRUCTURE_ROAD) {
-                costMatrix.set(structure.pos.x, structure.pos.y, 1)
-            }
-            else if (structure.structureType == STRUCTURE_RAMPART && structure.my) {
-                debug("${structure} is a rampart")
-            }
-            else if (structure.structureType != STRUCTURE_CONTAINER) {
-                // Can't walk through non-walkable buildings
-                debug("${structure} is not walkable")
-                costMatrix.set(structure.pos.x, structure.pos.y, 750)
-            }
-        }
-
-        return costMatrix
-    }
-
-    private fun getPathToTarget(target: RoomPosition): Array<RoomPosition> {
-
-        val searchResult = PathFinder.search(creep.pos, target, options = jsObject {
-            plainCost = 1
-            swampCost = 5
-            roomCallback = this@Claimer::getRoomCostMatrix
-        })
-
-        if (searchResult.incomplete) {
-            error("Could not find path to ${target}")
-        }
-
-        info("Target controller is ${searchResult.path.size} tiles away")
-        for (position in searchResult.path.withIndex()) {
-            debug("Position ${position.index}: ${position.value}")
-            if (position.value.roomName != creep.room.name) {
-                debug("End of positions in current room, there are  ${searchResult.path.size - position.index} positions left in path")
-                break
-            }
-        }
-
-        return searchResult.path
-    }
-
     private fun moveToFlag() {
         if (targetFlag == null) {
             error("No target room flag located!")
             return
         }
 
-        val path = getPathToTarget(targetFlag.pos)
+        val path = getPathToTarget(creep.pos, targetFlag.pos)
         creep.move(creep.pos.getDirectionTo(path[0]))
     }
 
