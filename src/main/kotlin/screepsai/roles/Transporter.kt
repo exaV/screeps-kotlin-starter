@@ -61,10 +61,10 @@ class Transporter(creep: Creep) : Role(creep) {
             when (it.unsafeCast<Structure>().structureType) {
                 // TODO: Determine priority level more intelligently
                 STRUCTURE_SPAWN     -> 1
-                STRUCTURE_EXTENSION -> 2
-                STRUCTURE_TOWER     -> 3
-                STRUCTURE_STORAGE   -> 4
-                else                -> 5
+                STRUCTURE_EXTENSION -> 1
+                STRUCTURE_TOWER     -> 2
+                STRUCTURE_STORAGE   -> 3
+                else                -> 4
             }
         }
 
