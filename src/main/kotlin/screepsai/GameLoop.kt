@@ -77,6 +77,9 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
                     creep.setRole(CreepRole.TRANSPORTER)
                 }
             }
+            catch (error: Exception) {
+                console.log("${creep.name} failed to run due to error: ${error}")
+            }
         }
     }
 }
