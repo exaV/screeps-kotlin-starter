@@ -2,7 +2,10 @@ package screepsai.roles
 
 import screeps.api.*
 import screeps.api.structures.StructureController
+import screeps.utils.memory.memory
 import screepsai.utils.*
+
+var FlagMemory.spawnerId: String? by memory()
 
 class Claimer(creep: Creep) : Role(creep) {
 
@@ -48,9 +51,11 @@ class Claimer(creep: Creep) : Role(creep) {
 
         val code = room.createConstructionSite(spawnPos, STRUCTURE_SPAWN)
 
+        val spawner = room.find(FIND_CONSTRUCTION_SITES).first()
+        targetFlag.memory.spawnerId = spawner.id
+
         if (code == OK) {
             info("${room} successfully initialized, construction may begin!")
-            targetFlag.remove()
         }
     }
 }

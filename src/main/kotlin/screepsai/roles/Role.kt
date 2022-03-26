@@ -14,7 +14,8 @@ enum class CreepRole {
     UPGRADER,
     BUILDER,
     MAINTAINER,
-    CLAIMER
+    CLAIMER,
+    REMOTE_CONSTRUCTION
 }
 
 enum class CreepState {
@@ -41,13 +42,14 @@ abstract class Role(val creep: Creep) {
          */
         fun build(creepRole: CreepRole, creep: Creep): Role {
             return when (creepRole) {
-                CreepRole.UNASSIGNED  -> throw IllegalArgumentException("Cannot process a creep without a role")
-                CreepRole.HARVESTER   -> Harvester(creep)
-                CreepRole.UPGRADER    -> Upgrader(creep)
-                CreepRole.TRANSPORTER -> Transporter(creep)
-                CreepRole.BUILDER     -> Builder(creep)
-                CreepRole.MAINTAINER  -> Maintainer(creep)
-                CreepRole.CLAIMER     -> Claimer(creep)
+                CreepRole.UNASSIGNED          -> throw IllegalArgumentException("Cannot process a creep without a role")
+                CreepRole.HARVESTER           -> Harvester(creep)
+                CreepRole.UPGRADER            -> Upgrader(creep)
+                CreepRole.TRANSPORTER         -> Transporter(creep)
+                CreepRole.BUILDER             -> Builder(creep)
+                CreepRole.MAINTAINER          -> Maintainer(creep)
+                CreepRole.CLAIMER             -> Claimer(creep)
+                CreepRole.REMOTE_CONSTRUCTION -> RemoteConstructionVehicle(creep)
             }
         }
     }

@@ -42,19 +42,38 @@ val BUILDER_BODIES = arrayOf(
     Body(arrayOf(WORK, CARRY, CARRY, CARRY, MOVE)),
     Body(arrayOf(MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY))
 )
+
 val CLAIMER_BODIES = arrayOf(
     Body(arrayOf(MOVE, CLAIM)),
 )
 
+val REMOTE_CONSTRUCTION_BODIES = arrayOf(
+    Body(
+        arrayOf(
+            MOVE, MOVE, MOVE, MOVE, MOVE,
+            MOVE, MOVE, MOVE, MOVE, MOVE,
+            MOVE, MOVE, MOVE, MOVE, MOVE,
+            MOVE, MOVE, MOVE, MOVE, MOVE,
+            WORK, WORK, WORK, WORK, WORK,
+            WORK, WORK, WORK, WORK, WORK,
+            CARRY, CARRY, CARRY, CARRY, CARRY,
+            CARRY, CARRY, CARRY, CARRY, CARRY,
+            CARRY, CARRY, CARRY, CARRY, CARRY,
+            CARRY, CARRY, CARRY, CARRY, CARRY
+        )
+    ),
+)
+
 fun getBody(role: CreepRole, energyAvailable: Int): Body {
     val bodies = when (role) {
-        CreepRole.UNASSIGNED  -> return BASE_BODY
-        CreepRole.HARVESTER   -> HARVESTER_BODIES
-        CreepRole.UPGRADER    -> UPGRADER_BODIES
-        CreepRole.TRANSPORTER -> TRANSPORTER_BODIES
-        CreepRole.BUILDER     -> BUILDER_BODIES
-        CreepRole.MAINTAINER  -> BUILDER_BODIES
-        CreepRole.CLAIMER     -> CLAIMER_BODIES
+        CreepRole.UNASSIGNED          -> return BASE_BODY
+        CreepRole.HARVESTER           -> HARVESTER_BODIES
+        CreepRole.UPGRADER            -> UPGRADER_BODIES
+        CreepRole.TRANSPORTER         -> TRANSPORTER_BODIES
+        CreepRole.BUILDER             -> BUILDER_BODIES
+        CreepRole.MAINTAINER          -> BUILDER_BODIES
+        CreepRole.CLAIMER             -> CLAIMER_BODIES
+        CreepRole.REMOTE_CONSTRUCTION -> REMOTE_CONSTRUCTION_BODIES
     }
 
     return bodies.last { it.cost <= energyAvailable }
@@ -67,7 +86,7 @@ fun spawnCreep(spawn: StructureSpawn, role: CreepRole, body: Body): Creep? {
         OK                    -> console.log("spawning $newName with body ${body.parts}")
         ERR_BUSY              -> console.log("Spawner ${spawn} in ${spawn.room} is busy")
         ERR_NOT_ENOUGH_ENERGY -> console.log("Not enough energy to spawn a new ${role.name}")
-        else                  -> console.log("unhandled error code $code")
+        else                  -> console.log("Unhandled error code $code")
     }
 
     if (code != OK) {
@@ -106,18 +125,23 @@ fun spawnNewCreep(
 }
 
 
-fun spawnClaimer(targetFlag: Flag): Creep? {
-    val body = CLAIMER_BODIES[0]
+fun spawnCrossRoomCreep(role: CreepRole, targetFlag: Flag): Creep? {
+    val body = when (role) {
+        CreepRole.CLAIMER             -> CLAIMER_BODIES[0]
+        CreepRole.REMOTE_CONSTRUCTION -> REMOTE_CONSTRUCTION_BODIES[0]
+        else                          -> throw IllegalArgumentException("${role} not supported yet")
+    }
+
     val spawner = Game.spawns.values.filter { it.room.energyAvailable > body.cost }.minByOrNull {
         it.pos.getRangeTo(targetFlag)
     }
 
     if (spawner == null) {
-        console.log("Cannot claim a room if no spawners are available!")
+        console.log("No spawners available to create a new ${role}!")
         return null
     }
 
-    return spawnCreep(spawner, CreepRole.CLAIMER, CLAIMER_BODIES[0])
+    return spawnCreep(spawner, role, body)
 }
 
 fun houseKeeping(creeps: Record<String, Creep>) {

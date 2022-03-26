@@ -83,11 +83,25 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
 
 fun claimNewRooms(creepsByRoomAndRole: Map<CreepRole, Map<Room, List<Creep>>>) {
     val nextRoomFlag = Game.flags["NextRoom"] ?: return console.log("No NextRoom flag, skipping claim room routine")
-    val claimer =
-        creepsByRoomAndRole[CreepRole.CLAIMER]?.flatMap { it.value }?.firstOrNull() ?: spawnClaimer(nextRoomFlag)
-        ?: return console.log("No claimer creep could be located or created")
 
-    Role.build(CreepRole.CLAIMER, claimer).run()
+    if (nextRoomFlag.memory.spawnerId == null) {
+        val claimer =
+            creepsByRoomAndRole[CreepRole.CLAIMER]?.flatMap { it.value }?.firstOrNull()
+                ?: spawnCrossRoomCreep(
+                    CreepRole.CLAIMER, nextRoomFlag
+                )
+                ?: return console.log("No claimer creep could be located or created")
+
+        Role.build(CreepRole.CLAIMER, claimer).run()
+    }
+    else {
+        val builder = creepsByRoomAndRole[CreepRole.REMOTE_CONSTRUCTION]?.flatMap { it.value }?.firstOrNull()
+            ?: spawnCrossRoomCreep(
+                CreepRole.REMOTE_CONSTRUCTION, nextRoomFlag
+            ) ?: return console.log("No RCV could be located or created")
+
+        Role.build(CreepRole.REMOTE_CONSTRUCTION, builder).run()
+    }
 }
 
 
