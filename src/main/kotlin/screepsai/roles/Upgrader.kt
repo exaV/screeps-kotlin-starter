@@ -22,7 +22,11 @@ class Upgrader(creep: Creep) : Role(creep) {
         val storage = creep.room.storage
 
         if (storage == null || (storage.store.getUsedCapacity(RESOURCE_ENERGY) ?: 0) <= 0) {
-            pickupEnergy()
+            val code = pickupEnergy()
+            // If no energy could be found, try and use whatever energy we do have
+            if (code == ERR_NOT_FOUND && creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                state = CreepState.DO_WORK
+            }
             return
         }
 
