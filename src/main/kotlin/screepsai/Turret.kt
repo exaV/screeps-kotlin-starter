@@ -26,6 +26,10 @@ fun repairWalls(tower: StructureTower) {
 
     if (wall.hits.toFloat() / maxWallHp.toFloat() > 0.9) {
         console.log("${tower} not repairing since all walls are roughly same hp")
+    }
+
+    if (wall.structureType == STRUCTURE_RAMPART && wall.hits > 500000) {
+        console.log("${tower} not repairing since ramparts are healthy")
         return
     }
 
