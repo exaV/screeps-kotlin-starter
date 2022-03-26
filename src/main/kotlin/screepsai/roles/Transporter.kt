@@ -27,7 +27,15 @@ class Transporter(creep: Creep) : Role(creep) {
         val status = pickupEnergy()
 
         if (status == ERR_NOT_FOUND) {
-            val storage = creep.room.storage ?: return
+            val storage = creep.room.storage
+            if (storage == null || storage.store.getUsedCapacity(RESOURCE_ENERGY) <= 0) {
+                warning("No energy could be found in room", say = true)
+                // Try to transport whatever energy we do have while waiting on more to be generated
+                if (creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
+                    state = CreepState.DO_WORK
+                }
+                return
+            }
             warning("No energy to pick up, gathering from storage")
             val code = creep.withdraw(storage, RESOURCE_ENERGY)
             if (code == ERR_NOT_IN_RANGE) {
