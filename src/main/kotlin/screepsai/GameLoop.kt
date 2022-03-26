@@ -3,6 +3,7 @@ package screepsai
 
 import screeps.api.*
 import screeps.api.structures.StructureTower
+import screeps.utils.unsafe.delete
 import screepsai.roles.*
 
 fun getCreepsByRole(): Map<CreepRole, Map<Room, List<Creep>>> {
@@ -87,23 +88,30 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
 fun claimNewRooms(creepsByRoomAndRole: Map<CreepRole, Map<Room, List<Creep>>>) {
     val nextRoomFlag = Game.flags["NextRoom"] ?: return console.log("No NextRoom flag, skipping claim room routine")
 
+    if (nextRoomFlag.memory.complete) {
+        console.log("Current room claim target has been successfully claimed")
+        if (Memory.flags?.get(nextRoomFlag.name) != null) {
+            delete(Memory.flags!![nextRoomFlag.name])
+        }
+        nextRoomFlag.remove()
+        return
+    }
     if (nextRoomFlag.memory.spawnerId == null) {
-        val claimer =
-            creepsByRoomAndRole[CreepRole.CLAIMER]?.flatMap { it.value }?.firstOrNull()
-                ?: spawnCrossRoomCreep(
-                    CreepRole.CLAIMER, nextRoomFlag
-                )
-                ?: return console.log("No claimer creep could be located or created")
-
-        Role.build(CreepRole.CLAIMER, claimer).run()
+        creepsByRoomAndRole[CreepRole.CLAIMER]?.flatMap { it.value }?.firstOrNull()
+            ?: spawnCrossRoomCreep(
+                CreepRole.CLAIMER, nextRoomFlag
+            )
+            ?: return console.log("No claimer creep could be located or created")
     }
     else {
-        val builder = creepsByRoomAndRole[CreepRole.REMOTE_CONSTRUCTION]?.flatMap { it.value }?.firstOrNull()
-            ?: spawnCrossRoomCreep(
+        val builders =
+            creepsByRoomAndRole[CreepRole.REMOTE_CONSTRUCTION]?.flatMap { it.value }?.toMutableList() ?: mutableListOf()
+
+        if (builders.size < 2) {
+            spawnCrossRoomCreep(
                 CreepRole.REMOTE_CONSTRUCTION, nextRoomFlag
             ) ?: return console.log("No RCV could be located or created")
-
-        Role.build(CreepRole.REMOTE_CONSTRUCTION, builder).run()
+        }
     }
 }
 
