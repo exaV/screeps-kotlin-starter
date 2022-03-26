@@ -1,7 +1,10 @@
 package screepsai.roles
 
 import screeps.api.*
+import screeps.utils.memory.memory
 import screepsai.utils.getPathToTarget
+
+var FlagMemory.complete: Boolean by memory { false }
 
 class RemoteConstructionVehicle(creep: Creep) : Role(creep) {
     private val targetFlag: Flag? = Game.flags["NextRoom"]
@@ -10,6 +13,11 @@ class RemoteConstructionVehicle(creep: Creep) : Role(creep) {
         if (targetFlag == null) {
             error("No target to work with!")
             return
+        }
+
+        if (targetFlag.room?.find(FIND_MY_SPAWNS)?.firstOrNull() != null) {
+            info("Spawn construction completed!")
+            targetFlag.memory.complete = true
         }
 
         // Move to target room if not in room
@@ -100,7 +108,12 @@ class RemoteConstructionVehicle(creep: Creep) : Role(creep) {
         val status = creep.build(constructionSite)
 
         if (status == ERR_NOT_IN_RANGE) {
-            creep.move(creep.pos.getDirectionTo(getPathToTarget(creep.pos, constructionSite.pos)[0]))
+            if (creep.room != constructionSite.room) {
+                creep.move(creep.pos.getDirectionTo(getPathToTarget(creep.pos, constructionSite.pos)[0]))
+            }
+            else {
+                creep.moveTo(constructionSite)
+            }
         }
         else if (status == ERR_NOT_ENOUGH_ENERGY) {
             info("Out of energy", say = true)
