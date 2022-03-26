@@ -22,7 +22,7 @@ val roleMemberCount = mapOf(
     CreepRole.TRANSPORTER to 2,
     CreepRole.MAINTAINER to 2,
     CreepRole.UPGRADER to 8,
-    CreepRole.BUILDER to 1
+    CreepRole.BUILDER to 2
 )
 
 fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep>>>) {
@@ -49,6 +49,17 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
     else {
         console.log("All roles filled in ${room}")
     }
+    var prioritySpawnActive = false
+    if ((creepsByRole[CreepRole.HARVESTER]?.size ?: 0) < (room.find(FIND_SOURCES).size)) {
+        console.log("${room} spawning priority harvester")
+        spawnNewCreep(CreepRole.HARVESTER, room)
+        prioritySpawnActive = true
+    }
+    else if ((creepsByRole[CreepRole.TRANSPORTER]?.size ?: 0) < roleMemberCount[CreepRole.TRANSPORTER]) {
+        console.log("${room} spawning priority transporter")
+        spawnNewCreep(CreepRole.TRANSPORTER, room)
+        prioritySpawnActive = true
+    }
 
     for (record in creepsByRole) {
         val creepRole = record.key
@@ -57,7 +68,7 @@ fun runRoom(room: Room, creepsByRoleAndRoom: Map<CreepRole, Map<Room, List<Creep
         val maxCreepsInRole = roleMemberCount[creepRole] ?: 0
         console.log("${room} ${creepRole}: ${creepCount}/${maxCreepsInRole}")
         // Spawn more creeps if we are not at the desired volume
-        if (creepCount < maxCreepsInRole) {
+        if (creepCount < maxCreepsInRole && !prioritySpawnActive) {
             if (creepCount <= minCreepsInUnfilledRole) {
                 spawnNewCreep(creepRole, room)
             }
