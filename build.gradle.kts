@@ -1,8 +1,6 @@
+import java.net.HttpURLConnection
 import java.net.URL
-import java.security.SecureRandom
 import java.util.*
-import javax.net.ssl.*
-
 
 plugins {
     kotlin("js") version "1.6.10"
@@ -22,11 +20,9 @@ val screepsPassword: String? by project
 val screepsToken: String? by project
 val screepsHost: String? by project
 val screepsBranch: String? by project
-val screepsSkipSslVerify: Boolean? by project
 val branch = screepsBranch ?: "default"
 val host = screepsHost ?: "https://screeps.com"
 val minifiedJsDirectory: String = File(buildDir, "minified-js").absolutePath
-val skipSsl = screepsSkipSslVerify ?: false
 
 kotlin {
     js {
@@ -94,25 +90,9 @@ tasks.register("deploy") {
         logger.lifecycle("Uploading ${jsFiles.count()} files to branch '$branch' on server $host")
         logger.debug("Request Body: $uploadContentJson")
 
-        /*
-         * Next we start the upload to the server
-         * We use very old school HttpURLConnection because it is available in jdk < 9
-         *
-         * For private servers you may need to disable the ssl verification if
-         * your server is not setup with valid certificates
-         * To do that use set `screepsSkipSslVerify=true` in gradle.properties
-         *
-         */
+        // upload using very old school HttpURLConnection as it is available in jdk < 9
         val url = URL("$host/api/user/code")
-        if (skipSsl){
-            val ctx = SSLContext.getInstance("TLS")
-            ctx.init(null, arrayOf(TrustAllTrustManager) , SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
-        }
-        val connection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
-        if(skipSsl){
-            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
-        }
+        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
         connection.doOutput = true
         connection.requestMethod = "POST"
         connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
@@ -143,10 +123,4 @@ tasks.register("deploy") {
 
     }
 
-}
-
-private object TrustAllTrustManager : X509TrustManager {
-    override fun checkClientTrusted(arg0: Array<java.security.cert.X509Certificate?>?, arg1: String?) {}
-    override fun checkServerTrusted(arg0: Array<java.security.cert.X509Certificate?>?, arg1: String?) {}
-    override fun getAcceptedIssuers() = null
 }
