@@ -6,7 +6,9 @@ import starter.gameLoop
  *
  * must not be removed by DCE
  */
-@Suppress("unused")
+@OptIn(ExperimentalJsExport::class)
+@JsExport
 fun loop() {
+    console.log("hello from kotlin 1.9")
     gameLoop()
 }

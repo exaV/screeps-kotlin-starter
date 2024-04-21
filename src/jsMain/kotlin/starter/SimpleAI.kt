@@ -11,7 +11,7 @@ fun gameLoop() {
     val mainSpawn: StructureSpawn = Game.spawns.values.firstOrNull() ?: return
 
     //delete memories of creeps that have passed away
-    houseKeeping(Game.creeps)
+//    houseKeeping(Game.creeps)
 
     // just an example of how to use room memory
     mainSpawn.room.memory.numberOfCreeps = mainSpawn.room.find(FIND_CREEPS).count()
