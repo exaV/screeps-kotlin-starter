@@ -1,11 +1,9 @@
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
 import java.net.URL
-import java.security.SecureRandom
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.*
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
-import javax.net.ssl.X509TrustManager
 
 
 plugins {
@@ -56,7 +54,7 @@ kotlin {
                 useKarma()
             }
 
-            webpackTask{
+            webpackTask {
             }
 
             binaries.executable()
@@ -108,60 +106,37 @@ tasks.register("deploy") {
         logger.lifecycle("Uploading ${jsFiles.count()} files to branch '$branch' on server $host")
         logger.debug("Request Body: $uploadContentJson")
 
-        /*
-         * Next we start the upload to the server
-         * We use very old school HttpURLConnection because it is available in jdk < 9
-         *
-         * For private servers you may need to disable the ssl verification if
-         * your server is not setup with valid certificates
-         * To do that use set `screepsSkipSslVerify=true` in gradle.properties
-         *
-         */
+        // upload using java 11 http client -> requires java 11
         val url = URL("$host/api/user/code")
-        if (skipSsl) {
-            val ctx = SSLContext.getInstance("TLS")
-            ctx.init(null, arrayOf(TrustAllTrustManager), SecureRandom())
-            HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
-        }
-        val connection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
-        if (skipSsl) {
-            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
-        }
-        connection.doOutput = true
-        connection.requestMethod = "POST"
-        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        val request = HttpRequest.newBuilder()
+            .uri(url.toURI())
+            .setHeader("Content-Type", "application/json; charset=utf-8")
+            .POST(HttpRequest.BodyPublishers.ofString(uploadContentJson))
+
+
         if (screepsToken != null) {
-            connection.setRequestProperty("X-Token", screepsToken)
+            request.header("X-Token", screepsToken)
         } else {
             fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
-            connection.setRequestProperty("Authorization", "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
-        }
-        connection.outputStream.use {
-            it.write(uploadContentJson.byteInputStream().readBytes())
+            request.header("Authorization", "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
         }
 
-        val code = connection.responseCode
-        val message = connection.responseMessage
-        if (code in 200..299) {
-            val body = connection.inputStream.bufferedReader().readText()
-            logger.lifecycle("Upload done! $body")
+        val response = HttpClient.newBuilder()
+            .build()
+            .send(request.build(), HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() in 200..299) {
+            logger.lifecycle("Upload done! ${response.body()}")
         } else {
-            val body = connection.errorStream.bufferedReader().readText()
-            val shortMessage = "Upload failed! $code $message"
+            val shortMessage = "Upload failed! ${response.statusCode()}"
 
             logger.lifecycle(shortMessage)
-            logger.lifecycle(body)
+            logger.lifecycle(response.body())
             logger.error(shortMessage)
-            logger.error(body)
+            logger.error(response.body())
         }
-        connection.disconnect()
 
     }
 
 }
 
-private object TrustAllTrustManager : X509TrustManager {
-    override fun checkClientTrusted(arg0: Array<java.security.cert.X509Certificate?>?, arg1: String?) {}
-    override fun checkServerTrusted(arg0: Array<java.security.cert.X509Certificate?>?, arg1: String?) {}
-    override fun getAcceptedIssuers() = null
-}
