@@ -1,13 +1,16 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDceDsl
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
 import java.net.URL
 import java.security.SecureRandom
 import java.util.*
-import javax.net.ssl.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 
 plugins {
-    kotlin("multiplatform") version "1.9.23"
+    kotlin("multiplatform") version "2.0.0-RC1"
+    kotlin("plugin.js-plain-objects") version "2.0.0-RC1"
 }
 
 repositories {
@@ -31,8 +34,7 @@ kotlin {
     sourceSets {
         jsMain {
             dependencies {
-                implementation("io.github.exav:screeps-kotlin-types:1.13.0")
-
+                implementation("io.github.exav:screeps-kotlin-types:2.0.2")
             }
 
         }
@@ -44,39 +46,31 @@ kotlin {
     }
     js {
 
-
         browser {
-            @OptIn(ExperimentalDceDsl::class)
-            dceTask {
-                dceOptions.devMode = false
-            }
-
             @OptIn(ExperimentalDistributionDsl::class)
             distribution {
                 outputDirectory.set(minifiedJsDirectory)
             }
 
-
-            webpackTask {
-//                output.libraryTarget = "commonjs2"
+            testTask {
+                useKarma()
             }
+
+            webpackTask{
+            }
+
+            binaries.executable()
         }
-
-        binaries.executable()
-
-
-
 
     }
 }
 
 
-fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
 
 
 tasks.register("deploy") {
     group = "screeps"
-    dependsOn("jsBrowserProductionWebpack")
+    dependsOn("assemble")
 
     doFirst { // use doFirst to avoid running this code in configuration phase
         if (screepsToken == null && (screepsUser == null || screepsPassword == null)) {
@@ -124,13 +118,13 @@ tasks.register("deploy") {
          *
          */
         val url = URL("$host/api/user/code")
-        if (skipSsl){
+        if (skipSsl) {
             val ctx = SSLContext.getInstance("TLS")
-            ctx.init(null, arrayOf(TrustAllTrustManager) , SecureRandom())
+            ctx.init(null, arrayOf(TrustAllTrustManager), SecureRandom())
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
         }
         val connection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
-        if(skipSsl){
+        if (skipSsl) {
             connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
         }
         connection.doOutput = true
@@ -139,6 +133,7 @@ tasks.register("deploy") {
         if (screepsToken != null) {
             connection.setRequestProperty("X-Token", screepsToken)
         } else {
+            fun String.encodeBase64() = Base64.getEncoder().encodeToString(this.toByteArray())
             connection.setRequestProperty("Authorization", "Basic " + "$screepsUser:$screepsPassword".encodeBase64())
         }
         connection.outputStream.use {
