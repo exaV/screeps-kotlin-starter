@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
-import java.net.URL
+import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
@@ -7,8 +7,8 @@ import java.util.*
 
 
 plugins {
-    kotlin("multiplatform") version "2.0.0-RC1"
-    kotlin("plugin.js-plain-objects") version "2.0.0-RC1"
+    kotlin("multiplatform") version "2.0.0"
+    kotlin("plugin.js-plain-objects") version "2.0.0"
 }
 
 repositories {
@@ -32,7 +32,7 @@ kotlin {
     sourceSets {
         jsMain {
             dependencies {
-                implementation("io.github.exav:screeps-kotlin-types:2.0.2")
+                implementation("io.github.exav:screeps-kotlin-types:2.1.0")
             }
 
         }
@@ -107,9 +107,9 @@ tasks.register("deploy") {
         logger.debug("Request Body: $uploadContentJson")
 
         // upload using java 11 http client -> requires java 11
-        val url = URL("$host/api/user/code")
+        val url = URI("$host/api/user/code")
         val request = HttpRequest.newBuilder()
-            .uri(url.toURI())
+            .uri(url)
             .setHeader("Content-Type", "application/json; charset=utf-8")
             .POST(HttpRequest.BodyPublishers.ofString(uploadContentJson))
 
