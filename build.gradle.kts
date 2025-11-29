@@ -63,8 +63,28 @@ kotlin {
     }
 }
 
+tasks.register("fixMainModuleGlobalThis") {
+    group = "build"
+    dependsOn("jsBrowserDistribution")
 
+    doLast {
+        val minifiedCodeLocation = minifiedJsDirectory.get().asFile
+        val lineToAdd = "if (!Game.rooms['sim']) globalThis = this;"
 
+        val jsFiles = minifiedCodeLocation.listFiles { _, name -> name.endsWith(".js") }.orEmpty()
+        val (mainModule, _) = jsFiles.partition { it.nameWithoutExtension == project.name }
+        val main = mainModule.firstOrNull()
+            ?: throw IllegalStateException("Could not find js file corresponding to main module in ${minifiedCodeLocation.absolutePath}. Was looking for ${project.name}.js")
+        val originalMainContent = main.readText()
+        if (originalMainContent.contains(lineToAdd)) return@doLast
+        main.writeText(lineToAdd + originalMainContent)
+        logger.lifecycle("Prepended line to ${main.name}")
+    }
+}
+
+tasks.named("assemble") {
+    finalizedBy("fixMainModuleGlobalThis")
+}
 
 tasks.register("deploy") {
     group = "screeps"
