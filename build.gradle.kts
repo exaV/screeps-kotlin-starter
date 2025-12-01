@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -7,8 +7,8 @@ import java.util.*
 
 
 plugins {
-    kotlin("multiplatform") version "2.0.0"
-    kotlin("plugin.js-plain-objects") version "2.0.0"
+    kotlin("multiplatform") version "2.2.21"
+    kotlin("plugin.js-plain-objects") version "2.2.21"
 }
 
 repositories {
@@ -32,7 +32,7 @@ kotlin {
     sourceSets {
         jsMain {
             dependencies {
-                implementation("io.github.exav:screeps-kotlin-types:2.1.0")
+                implementation("io.github.exav:screeps-kotlin-types:2.2.0")
             }
 
         }
@@ -43,18 +43,19 @@ kotlin {
         }
     }
     js {
+        compilerOptions {
+            target = "es2015"
+        }
 
         browser {
-            @OptIn(ExperimentalDistributionDsl::class)
-            distribution {
-                outputDirectory.set(minifiedJsDirectory)
-            }
-
             testTask {
                 useKarma()
             }
 
             webpackTask {
+                outputDirectory = minifiedJsDirectory
+                mode = KotlinWebpackConfig.Mode.PRODUCTION // can use DEVELOPMENT to generate code without minification
+                output.globalObject = "this" // make sure 'globalThis' works when running script in World
             }
 
             binaries.executable()
