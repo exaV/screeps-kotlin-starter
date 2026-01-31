@@ -8,6 +8,9 @@ Feel free to copy/fork this repository to bootstrap your own AI.
 
 Join the official screeps discord on https://discord.com/invite/screeps and join #kotlin for help and general screeps kotlin chat.
 
+## Arena
+If you want to play Screeps:Arena then head over here https://github.com/exaV/screeps-kotlin-arena
+
 ### Getting started
 
 This AI tries to build a 'big' harvester creep with __4__ work parts which cost a hefty 550 energy!
